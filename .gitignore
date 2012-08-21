@@ -1,3 +1,8 @@
 .idea
 MANIFEST
 build
+SiteBaker.egg-info
+*.egg*
+*.pyc
+dist
+__pycache__
