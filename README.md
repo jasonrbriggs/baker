@@ -1,0 +1,4 @@
+sitebaker
+=========
+
+Static site generation
