@@ -121,22 +121,3 @@ class Generator:
         f = open(os.path.join(page.output_path, page.url[1:] + '.html'), 'w+')
         f.write(out)
         f.close()
-
-# builtins... not really an acceptable programming style, but mimicks the WordPress global funcs.
-#import builtin
-#setattr(builtin, 'add_filter', add_filter)
-#setattr(builtin, 'apply_filter', apply_filter)
-
-
-'''
-if __name__ == '__main__':
-    parser = OptionParser()
-    parser.add_option("-d", "--dir", dest = "dir", help = "", default = os.getcwd())
-    parser.add_option("-o", "--output", dest = "output", help = "", default = os.getcwd())
-    parser.add_option("-f", "--force", dest = "force", help = "", default = 'false', action='callback', callback = utils.optional_arg('true'))
-
-    (options, args) = parser.parse_args()
-
-    generator = Generator(options)
-    generator.generate()
-'''
