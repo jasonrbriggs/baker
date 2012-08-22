@@ -1,14 +1,11 @@
 import os
 import sys
-#from optparse import OptionParser
 
 from proton.template import Templates
 
 import utils
 import pages
-
-global filters
-filters = { }
+import __init__
 
 
 def load_pages(dir, output_path, configs, templates):
@@ -51,10 +48,10 @@ def add_filter(name, plugin):
     \param plugin
         the callabale we'll invoke for this filter
     '''
-    global filters
-    if name not in filters:
-        filters[name] = [ ]
-    filters[name].append(plugin)
+
+    if name not in __init__.__filters__:
+        __init__.__filters__[name] = [ ]
+    __init__.__filters__[name].append(plugin)
 
 
 def apply_filter(name, *args):
@@ -66,9 +63,8 @@ def apply_filter(name, *args):
     \param args
         the set of arguments to pass to the plugin/callable
     '''
-    global filters
-    if name in filters:
-        plugins = filters[name]
+    if name in __init__.__filters__:
+        plugins = __init__.__filters__[name]
         for plugin in plugins:
             plugin(*args)
 
@@ -96,7 +92,7 @@ class Generator:
 
         apply_filter('pages', pages, self.options.output)
 
-        comp = utils.Compressor(options.dir, options.output);
+        comp = utils.Compressor(self.options.dir, self.options.output);
         comp.compress_files()
 
     def __generate(self, page):
@@ -114,7 +110,6 @@ class Generator:
         apply_filter('page-menu', page)
         apply_filter('post-meta', page)
 
-        import __init__
         page.template.setattribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
         out = str(page.template)
