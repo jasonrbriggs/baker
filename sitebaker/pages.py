@@ -2,8 +2,6 @@ import os
 
 from proton.template import Templates
 
-import utils
-
 class Page:
     def __init__(self, path = None, output_path = None, url = None, config = None):
         self.url = url

@@ -13,12 +13,9 @@ class Compressor:
             with open(src, 'rb') as f_in:
                 with gzip.open(target, 'wb', 9) as f_out:
                     f_out.writelines(f_in)
-            if os.path.getsize(target) > os.path.getsize(src):
-                os.remove(target)
 
     def compress_files(self):
         self.compress('.jpg', '.jpggz')
-        self.compress('.png', '.pnggz')
         self.compress('.css', '.cssgz')
 
 
@@ -93,7 +90,8 @@ def find_changed_files(source_dir, source_ext, target_dir, target_ext):
         if not os.path.exists(target_path):
             os.mkdirs(target_path)
 
-        yield (source_name, target_name)
+        if not os.path.exists(target_name) or os.stat(source_name).st_mtime > os.stat(target_name).st_mtime:
+            yield (source_name, target_name)
 
 
 def find_config(configs, path):

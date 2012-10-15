@@ -1,7 +1,8 @@
 import math
+import os
 
-from pages import *
-from baker import apply_filter, add_filter
+from pages import filter_pages, Page
+from baker import add_filter, apply_filter
 from markdown import Markdown
 from proton.template import Templates
 
@@ -64,8 +65,6 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     if page_num > 0 and page_num < total_pages:
         index_page.template.setelement('pagelinksep', ' | ')
 
-
-
     index_page.template.repeat('posts', min(posts_per_page, total_posts - count))
     return index_page
 
@@ -83,5 +82,5 @@ def process(pages, output_path):
     for path in paths.split(','):
         process_path(path, output_path, pages)
 
-    
+
 add_filter('pages', process)
