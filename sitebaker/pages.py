@@ -1,6 +1,12 @@
 import os
+import re
+import time
 
+from markdown import Markdown
 from proton.template import Templates
+
+md = Markdown()
+title_end_re = re.compile(r'-(-+)\s*')
 
 class Page:
     def __init__(self, path = None, output_path = None, url = None, config = None):
@@ -12,6 +18,7 @@ class Page:
             self.full_content = open(path).read()
             statbuf = os.stat(path)
             self.last_modified = statbuf.st_mtime
+            self.fmt_last_modified = time.strftime('%d %b, %Y', time.localtime(self.last_modified))
         self.headers = { }
         self.config = config
 
@@ -49,6 +56,27 @@ class Page:
         self.headers = other_page.headers
         self.template = other_page.template
         self.config = other_page.config
+
+    def get_permalink(self):
+        domain = self.config.get('site', 'domain')
+        return 'http://%s%s' % (domain, self.url)
+
+    def get_posted_date(self):
+        if 'posted-on' in self.headers:
+            return self.headers['posted-on']
+        elif self.fmt_last_modified:
+            return self.fmt_last_modified
+        else:
+            return None
+
+    def get_html_content(self, include_title=False):
+        domain = self.config.get('site', 'domain')
+        if not include_title:
+            content = self.content[title_end_re.search(self.content).end():]
+        else:
+            content = self.content
+        html_content = md.convert(content)
+        return html_content.replace('src="/', 'src="http://%s/' % domain)
 
 def filter_pages(path, pages):
     for page in pages:

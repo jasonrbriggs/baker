@@ -1,4 +1,5 @@
 import configparser
+import optparse
 import os
 import unittest
 from mock import Mock, MagicMock
@@ -42,14 +43,13 @@ class HeadTest(unittest.TestCase):
             __main__.__builtins__.open = self.orig_open
 
     def test_head_generation(self):
-        '''
         mock_config = MagicMock(spec=configparser.ConfigParser)
-        #mock_options =
+        mock_options = MagicMock(spec=optparse.OptionParser)
 
         page = pages.Page('test.text', '/tmp', 'testsite/test.html', mock_config)
 
         self.assertEqual('this is a test', page.full_content)
 
-        #generator = baker.Generator(None)
+        #generator = baker.Generator(mock_options)
         #generator.pages = { '/test' : page }
-        '''
+

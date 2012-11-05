@@ -7,10 +7,6 @@ from baker import add_filter
 from markdown import Markdown
 from proton.template import Templates
 
-title_end_pat = re.compile(r'-(-+)\s*')
-
-md = Markdown()
-
 def process_path(path, output_path, pages):
     sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x : x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = min(len(sorted_posts), 20)
@@ -28,20 +24,19 @@ def process_path(path, output_path, pages):
     last_build = last_build.replace('BST', 'GMT')
     tmp.setelement('lastbuild', last_build)
 
+    max_modified = 0
     tmp.repeat('items', total_posts)
     for x in range(0, total_posts):
         page = sorted_posts[x]
+        max_modified = max(page.last_modified, max_modified)
 
-        domain = page.config.get('site', 'domain')
-        content = page.content[title_end_pat.search(page.content).end():]
-        html_content = md.convert(content)
-        html_content = html_content.replace('src="/', 'src="http://%s/' % domain)
+        html_content = page.get_html_content()
 
-        link = 'http://%s%s' % (domain, page.url)
+        link = page.get_permalink()
 
         tmp.setelement('title', page.headers['title'], x)
 
-        d = time.strftime('%a, %d %b %Y', time.strptime(page.headers['posted-on'], '%d %b, %Y'))
+        d = time.strftime('%a, %d %b %Y', time.strptime(page.get_posted_date(), '%d %b, %Y'))
         t = time.strftime(' %H:%M:%S %Z', time.localtime((page.last_modified))).replace('BST', 'GMT')
         tmp.setelement('pubdate', d + t, x)
         tmp.setelement('description', '<![CDATA[%s]]>' % html_content, x)
@@ -51,10 +46,13 @@ def process_path(path, output_path, pages):
     if path.startswith('/'):
         path = path[1:]
 
-    out = str(tmp)
-    f = open(os.path.join(output_path, path, 'feed.xml'), 'w+')
-    f.write(out)
-    f.close()
+    feed_file = os.path.join(output_path, path, 'feed.xml')
+    statbuf = os.stat(feed_file)
+    if max_modified > statbuf.st_mtime:
+        out = str(tmp)
+        f = open(feed_file, 'w+')
+        f.write(out)
+        f.close()
 
 def process(pages, output_path):
     paths = list(pages.values())[0].config.get('indexer', 'paths')
