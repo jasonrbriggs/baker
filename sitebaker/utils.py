@@ -49,7 +49,7 @@ class PluginManager:
 
         # Do the actual import
         __import__(name)
-        print("Loaded %s" % name)
+        #print("Loaded %s" % name)
 
     def new_instance(self, name, *args, **kwargs):
         '''
@@ -132,6 +132,22 @@ def has_option(conf, section, option):
         return None
 
 
+def has_section(conf, section):
+    if conf.original_has_section(section):
+        return True
+    elif conf.parent is not None:
+        return has_section(conf.parent, section)
+    else:
+        return None
+
+def items(conf, section):
+    if conf.original_has_section(section):
+        return conf.original_items(section)
+    elif conf.parent is not None:
+        return items(conf.parent, section)
+    else:
+        return []
+
 def load_configs(dir):
     configs = { }
     length = len(dir)
@@ -148,8 +164,12 @@ def load_configs(dir):
 
     configparser.ConfigParser.originalget = configparser.ConfigParser.get
     configparser.ConfigParser.original_has_option = configparser.ConfigParser.has_option
+    configparser.ConfigParser.original_has_section = configparser.ConfigParser.has_section
+    configparser.ConfigParser.original_items = configparser.ConfigParser.items
     configparser.ConfigParser.get = get_option
     configparser.ConfigParser.has_option = has_option
+    configparser.ConfigParser.has_section = has_section
+    configparser.ConfigParser.items = items
     return configs
 
 
@@ -171,10 +191,18 @@ def optional_arg(arg_default):
     return func
 
 
-def url_join(path1, path2):
+def __url_join(path1, path2):
     if path1.endswith('/') and path2.startswith('/'):
         return path1[0:len(path1)-1] + path2
     elif not path1.endswith('/') and not path2.startswith('/'):
         return path1 + '/' + path2
     else:
         return path1 + path2
+
+def url_join(*args):
+    if len(args) == 0:
+        return ''
+    elif len(args) == 1:
+        return args[0]
+    else:
+        return url_join(*(__url_join(args[0], args[1]),) + args[2:])

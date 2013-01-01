@@ -12,7 +12,7 @@ setup(
     author_email =  'jasonrbriggs@gmail.com',
     platforms = ['any'],
     packages = ['sitebaker', 'sitebaker.plugins' ],
-    install_requires = ['Markdown>=2.2.0', 'proton>=0.6'],
+    install_requires = ['Markdown>=2.2.0', 'proton>=0.7.1'],
     tests_require = [ 'mock' ],
     test_suite = 'tests',
     scripts = [ './baker' ]

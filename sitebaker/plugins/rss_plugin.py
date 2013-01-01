@@ -1,10 +1,8 @@
 import os
-import re
 import time
 
 from pages import filter_pages
 from baker import add_filter
-from markdown import Markdown
 from proton.template import Templates
 
 def process_path(path, output_path, pages):
@@ -40,15 +38,20 @@ def process_path(path, output_path, pages):
         t = time.strftime(' %H:%M:%S %Z', time.localtime((page.last_modified))).replace('BST', 'GMT')
         tmp.setelement('pubdate', d + t, x)
         tmp.setelement('description', '<![CDATA[%s]]>' % html_content, x)
-        tmp.setelement('link', link, x)
+        tmp.setelement('link', link + '.html', x)
         tmp.setelement('guid', link, x)
 
     if path.startswith('/'):
         path = path[1:]
 
     feed_file = os.path.join(output_path, path, 'feed.xml')
-    statbuf = os.stat(feed_file)
-    if max_modified > statbuf.st_mtime:
+    if os.path.exists(feed_file):
+        statbuf = os.stat(feed_file)
+        last_modified = statbuf.st_mtime
+    else:
+        last_modified = 0
+
+    if max_modified >= last_modified:
         out = str(tmp)
         f = open(feed_file, 'w+')
         f.write(out)

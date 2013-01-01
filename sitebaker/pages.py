@@ -11,8 +11,11 @@ title_end_re = re.compile(r'-(-+)\s*')
 class Page:
     def __init__(self, path = None, output_path = None, url = None, config = None):
         self.url = url
+        self.output_url = None
         self.output_path = output_path
         self.full_content = None
+        self.fmt_last_modified = None
+
         if path:
             name = os.path.basename(path)[0:-5]
             self.full_content = open(path).read()
@@ -49,6 +52,10 @@ class Page:
         if template_name:
             self.template = Templates._singleton[template_name]
 
+        if 'posted-on' in self.headers:
+            self.last_modified = time.mktime(time.strptime(self.headers['posted-on'], '%d %b, %Y'))
+            self.fmt_last_modified = self.headers['posted-on']
+
     def copy(self, other_page):
         self.url = other_page.url
         self.full_content = other_page.full_content
@@ -77,6 +84,9 @@ class Page:
             content = self.content
         html_content = md.convert(content)
         return html_content.replace('src="/', 'src="http://%s/' % domain)
+
+    def __str__(self):
+        return 'url=%s,updated=%s' % (self.get_permalink(), self.get_posted_date())
 
 def filter_pages(path, pages):
     for page in pages:

@@ -6,8 +6,6 @@ def process(page):
         split = menucfg.split(',')
         page.template.repeat('menu', len(split))
 
-        print(page.url)
-        print(split)
         x = 0
         for item in split:
             (id, link) = item.split('=')

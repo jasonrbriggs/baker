@@ -1,10 +1,12 @@
 import math
 import os
+import time
 
 from pages import filter_pages, Page
 from baker import add_filter, apply_filter
 from markdown import Markdown
 from proton.template import Templates
+import utils
 
 md = Markdown()
 
@@ -39,6 +41,7 @@ def process_path(path, output_path, pages):
     if index > 0:
         write_index_page(index_page.template, output_path, path, page_num)
 
+
 def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     index_page = Page()
     index_page.url = None
@@ -48,6 +51,7 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     apply_filter('page-head', index_page)
     apply_filter('page-meta', index_page)
     apply_filter('page-menu', index_page)
+    apply_filter('page-foot', index_page)
 
     total_pages = math.ceil(total_posts / posts_per_page) - 1
 
@@ -68,6 +72,7 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     index_page.template.repeat('posts', min(posts_per_page, total_posts - count))
     return index_page
 
+
 def write_index_page(tmp, output_path, path, page_num):
     page = ''
     if page_num > 0:
@@ -77,10 +82,25 @@ def write_index_page(tmp, output_path, path, page_num):
     f.write(out)
     f.close()
 
+
+def blog_command(options, configs, *args):
+    config = utils.find_config(configs, '/')
+    paths = config.get('indexer', 'paths').split(',')
+    path = paths[0]
+    newpath = utils.url_join(options.output, path, time.strftime('%Y/%m/%d'))
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+
+
 def process(pages, output_path):
     paths = list(pages.values())[0].config.get('indexer', 'paths')
     for path in paths.split(','):
         process_path(path, output_path, pages)
 
 
+def process_commands(commands):
+    commands['blog'] = blog_command
+
+
 add_filter('pages', process)
+add_filter('commands', process_commands)

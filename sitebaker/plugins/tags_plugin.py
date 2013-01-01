@@ -5,17 +5,14 @@ from baker import add_filter, apply_filter
 from pages import Page
 from proton.template import Templates
 
-split_re = re.compile(r'\s*,\s*')
-
-def sanitise_tag(tag):
-    return tag.replace(' ', '-')
+from tag_utils import *
 
 def process(pages, output_path):
     tags = { }
 
     for page in pages.values():
         if 'tags' in page.headers:
-            for tag in split_re.split(page.headers['tags']):
+            for tag in split_tags(page.headers['tags']):
                 tag = sanitise_tag(tag)
                 if tag not in tags:
                     tags[tag] = [ ]
@@ -36,7 +33,7 @@ def process(pages, output_path):
 
         tmp.repeat('posts', len(tags[tag]))
         x = 0
-        for page in sorted(tags[tag], key=lambda x : x.get_posted_date(), reverse=True):
+        for page in sorted(tags[tag], key=lambda x : x.last_modified, reverse=True):
             cpage = Page()
             cpage.copy(page)
             cpage.template = tmp
@@ -47,6 +44,7 @@ def process(pages, output_path):
         apply_filter('page-head', cpage)
         apply_filter('page-meta', cpage)
         apply_filter('page-menu', cpage)
+        apply_filter('page-foot', cpage)
 
         tmp.setelement('title', 'Tag: %s' % tag)
         tmp.setelement('tag', 'Tag: %s' % tag)
@@ -58,12 +56,22 @@ def process(pages, output_path):
 
     tag_counts = {k:len(v) for k, v in tags.items()}
 
+    tag_classes = { }
+    page = next(iter(pages.values()))
+    for (name, value) in page.config.items('tags'):
+        tag_classes[name] = value
+
     tmp = Templates._singleton['tags.html']
     tmp.repeat('tags', len(tags))
     x = 0
-    for tag in sorted(tag_counts, key=tag_counts.get, reverse=True):
+    for tag in sorted(tags):
         tmp.setelement('tag', tag, x)
         tmp.setattribute('tag', 'href', '/tags/%s.html' % tag, x)
+        count = tag_counts[tag]
+
+        for key in sorted(tag_classes, reverse=True):
+            if count >= int(key):
+                tmp.setattribute('tag', 'class', tag_classes[key], x)
         x += 1
 
     cpage = Page()
@@ -72,6 +80,7 @@ def process(pages, output_path):
     apply_filter('page-head', cpage)
     apply_filter('page-meta', cpage)
     apply_filter('page-menu', cpage)
+    apply_filter('page-foot', cpage)
 
     output_name = os.path.join(tag_dir, 'index.html')
     f = open(output_name, 'w+')
