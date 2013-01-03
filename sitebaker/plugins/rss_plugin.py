@@ -58,9 +58,10 @@ def process_path(path, output_path, pages):
         f.close()
 
 def process(pages, output_path):
-    paths = list(pages.values())[0].config.get('indexer', 'paths')
-    for path in paths.split(','):
-        process_path(path, output_path, pages)
+    paths = list(pages.values())[0].config.get('blog', 'paths')
+    if paths:
+        for path in paths.split(','):
+            process_path(path, output_path, pages)
 
 
 add_filter('pages', process)

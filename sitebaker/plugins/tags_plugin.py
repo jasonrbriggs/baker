@@ -62,6 +62,9 @@ def process(pages, output_path):
         tag_classes[name] = value
 
     tmp = Templates._singleton['tags.html']
+    if tmp is None:
+        return
+
     tmp.repeat('tags', len(tags))
     x = 0
     for tag in sorted(tags):

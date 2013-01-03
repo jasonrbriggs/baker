@@ -83,19 +83,20 @@ def write_index_page(tmp, output_path, path, page_num):
     f.close()
 
 
-def blog_command(options, configs, *args):
-    config = utils.find_config(configs, '/')
-    paths = config.get('indexer', 'paths').split(',')
+def blog_command(kernel, *args):
+    config = utils.find_config(kernel.configs, '/')
+    paths = config.get('blog', 'paths').split(',')
     path = paths[0]
-    newpath = utils.url_join(options.output, path, time.strftime('%Y/%m/%d'))
+    newpath = utils.url_join(kernel.options.output, path, time.strftime('%Y/%m/%d'))
     if not os.path.exists(newpath):
         os.makedirs(newpath)
 
 
 def process(pages, output_path):
-    paths = list(pages.values())[0].config.get('indexer', 'paths')
-    for path in paths.split(','):
-        process_path(path, output_path, pages)
+    paths = list(pages.values())[0].config.get('blog', 'paths')
+    if paths:
+        for path in paths.split(','):
+            process_path(path, output_path, pages)
 
 
 def process_commands(commands):

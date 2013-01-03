@@ -97,14 +97,15 @@ def do_action(name, *args):
             plugin(*args)
 
 
-class Generator:
+class Kernel:
 
     def __init__(self, options):
         self.options = options
         self.templates = Templates(os.path.join(options.dir, 'theme'))
         self.configs = utils.load_configs(options.dir)
         self.pm = utils.PluginManager(os.path.join(sys.path[0], 'plugins'))
-        self.commands = { 'generate' : self.generate }
+        self.pages = load_pages(options.dir, options.output, self.configs, self.templates)
+        self.commands = { }
         apply_filter('commands', self.commands)
 
     def help(self):
@@ -117,53 +118,4 @@ class Generator:
             print('No such command')
             sys.exit(1)
         else:
-            self.commands[command](self.options, self.configs, args)
-
-    def generate(self, options, configs, *args):
-        '''
-        Performs the following actions:
-        1. load pages
-        2. generate the output for each page
-        3. apply the 'pages' global filter for all pages
-        4. compress any applicable files (images, etc)
-        '''
-        pages = load_pages(options.dir, options.output, configs, self.templates)
-
-        print('Processing pages')
-        for page in pages.values():
-            self.generate_page(page)
-
-        print('Applying page filter')
-        apply_filter('pages', pages, self.options.output)
-
-        print('Compressing files')
-        comp = utils.Compressor(self.options.dir, self.options.output);
-        comp.compress_files()
-        print('Generation complete')
-
-    def generate_page(self, page):
-        '''
-        Internal generator called for each page which applies the following filters (before writing the html output):
-        1. page-head
-        2. page-meta
-        3. page-markdown
-        4. page-menu
-        5. post-meta
-        '''
-        apply_filter('page-head', page)
-        apply_filter('page-meta', page)
-        apply_filter('page-markdown', page)
-        apply_filter('page-menu', page)
-        apply_filter('post-meta', page)
-        apply_filter('page-foot', page)
-
-        page.template.setattribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
-
-        fname = page.url[1:] + '.html'
-
-        page.output_url = fname
-
-        out = str(page.template)
-        f = open(os.path.join(page.output_path, fname), 'w+')
-        f.write(out)
-        f.close()
+            self.commands[command](self, args)
