@@ -1,5 +1,4 @@
 import os
-import re
 
 from baker import add_filter, apply_filter
 from pages import Page

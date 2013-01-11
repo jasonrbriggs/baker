@@ -3,7 +3,7 @@ import os
 import time
 
 from pages import filter_pages, Page
-from baker import add_filter, apply_filter
+from baker import add_filter, apply_filter, do_action
 from markdown import Markdown
 from proton.template import Templates
 import utils
@@ -24,6 +24,7 @@ def process_path(path, output_path, pages):
     if path.startswith('/'):
         path = path[1:]
 
+    do_action('post-meta-reset')
     for page in sorted_posts:
         cpage = Page()
         cpage.copy(page)

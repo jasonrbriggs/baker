@@ -1,6 +1,6 @@
 import os
 
-from baker import add_filter, apply_filter
+from baker import add_filter, apply_filter, do_action
 import utils
 import __init__
 
@@ -33,6 +33,8 @@ def generate_page(page):
     4. page-menu
     5. post-meta
     '''
+    print('Processing %s' % page.url)
+    do_action('post-meta-reset')
     apply_filter('page-head', page)
     apply_filter('page-meta', page)
     apply_filter('page-markdown', page)
