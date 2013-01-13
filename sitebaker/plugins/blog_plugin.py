@@ -29,6 +29,7 @@ def process_path(path, output_path, pages):
     page_num = 0
     index = 0
 
+    print('>>>>>>>>>>>>>>>>>>>>>>> PROCESSING BLOG INDEX PAGE')
     index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
 
     if path.startswith('/'):
@@ -45,12 +46,15 @@ def process_path(path, output_path, pages):
         count += 1
         if index >= posts_per_page:
             write_index_page(index_page.template, output_path, path, page_num)
+            do_action('post-meta-reset')
             index = 0
             page_num += 1
             index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
 
     if index > 0:
         write_index_page(index_page.template, output_path, path, page_num)
+
+    print('>>>>>>>>>>>>>>>>>>>> BLOG INDEX COMPLETE')
 
 
 def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
@@ -103,7 +107,7 @@ def blog_command(kernel, *args):
         os.makedirs(newpath)
 
 
-def process(pages, output_path):
+def process_pages(pages, output_path):
     paths = list(pages.values())[0].config.get('blog', 'paths')
     if paths:
         for path in paths.split(','):
@@ -114,5 +118,5 @@ def process_commands(commands):
     commands['blog'] = blog_command
 
 
-add_filter('pages', process)
+add_filter('pages', process_pages)
 add_filter('commands', process_commands)
