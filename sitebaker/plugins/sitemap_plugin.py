@@ -7,6 +7,8 @@ from baker import add_filter
 
 def process(pages, output_path):
     tmp = Templates._singleton['sitemap.xml']
+    if not tmp:
+        return
     tmp.repeat('urls', len(pages))
     x = 0
 

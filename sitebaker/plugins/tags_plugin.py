@@ -1,6 +1,6 @@
 import os
 
-from baker import add_filter, apply_filter
+from baker import add_filter, apply_filter, do_action
 from pages import Page
 from proton.template import Templates
 
@@ -32,6 +32,7 @@ def process(pages, output_path):
 
         tmp.repeat('posts', len(tags[tag]))
         x = 0
+        do_action('post-meta-reset')
         for page in sorted(tags[tag], key=lambda x : x.last_modified, reverse=True):
             cpage = Page()
             cpage.copy(page)

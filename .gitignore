@@ -6,3 +6,4 @@ SiteBaker.egg-info
 *.pyc
 dist
 __pycache__
+.DS_Store

@@ -10,10 +10,20 @@ import utils
 
 md = Markdown()
 
+def get_posts_per_page(posts):
+    try:
+        return int(posts[0].config.get('blog', 'posts_per_page'))
+    except:
+        return 5
+
 def process_path(path, output_path, pages):
     sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x : x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = len(sorted_posts)
-    posts_per_page = int(sorted_posts[0].config.get('blog', 'posts_per_page'))
+
+    if total_posts == 0:
+        return
+
+    posts_per_page = get_posts_per_page(sorted_posts)
 
     count = 0
     page_num = 0
