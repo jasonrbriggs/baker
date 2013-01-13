@@ -1,14 +1,24 @@
 import os
+import re
 
 from baker import add_filter, apply_filter, add_action, do_action
 from pages import Page
 from proton.template import Templates
 
-from tag_utils import *
+split_re = re.compile(r'\s*,\s*')
 
 def reset():
     global tag_repeat_count
     tag_repeat_count = 0
+
+
+def sanitise_tag(tag):
+    return tag.replace(' ', '-')
+
+
+def split_tags(tags):
+    return split_re.split(tags)
+
 
 def process_postmeta(page, index=0):
     global tag_repeat_count
@@ -111,6 +121,7 @@ def process_pages(pages, output_path):
     f = open(output_name, 'w+')
     f.write(str(tmp))
     f.close()
+
 
 add_filter('pages', process_pages)
 add_filter('post-meta', process_postmeta)
