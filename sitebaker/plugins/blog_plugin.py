@@ -29,7 +29,6 @@ def process_path(path, output_path, pages):
     page_num = 0
     index = 0
 
-    print('>>>>>>>>>>>>>>>>>>>>>>> PROCESSING BLOG INDEX PAGE')
     index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
 
     if path.startswith('/'):
@@ -53,8 +52,6 @@ def process_path(path, output_path, pages):
 
     if index > 0:
         write_index_page(index_page.template, output_path, path, page_num)
-
-    print('>>>>>>>>>>>>>>>>>>>> BLOG INDEX COMPLETE')
 
 
 def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):

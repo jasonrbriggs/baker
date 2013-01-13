@@ -17,7 +17,6 @@ def process_postmeta(page, index=0):
         page.template.setelement('tags', 'Tagged: ', index)
         x = 0
         tags = split_tags(page.headers['tags'])
-        print('>>>>>>>>>>> GOT HERE %s, processing tags %s' % (page.url, tags))
         page.template.repeat('taglinks', len(tags), index)
         for tag in tags:
             tag = sanitise_tag(tag)
