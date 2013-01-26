@@ -6,5 +6,6 @@ def process(page, index=0):
         page.template.setelement('posted-on', 'Posted on %s' % page.get_posted_date(), index)
     page.template.setelement('permalink', 'Permalink', index)
     page.template.setattribute('permalink', 'href', page.url + '.html', index)
+    return page
 
 add_filter('post-meta', process)

@@ -9,5 +9,6 @@ def process(page):
 
     if page.config.has_option('templates', 'header'):
         page.template.include('header', page.config.get('templates', 'header'))
+    return page
             
 add_filter('page-head', process)

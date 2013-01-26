@@ -18,5 +18,6 @@ def process(page):
             page.template.setattribute('menulink', 'id', id, x)
             page.template.setattribute('menulink', 'href', link, x)
             x += 1
+    return page
             
 add_filter('page-menu', process)

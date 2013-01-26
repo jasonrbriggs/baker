@@ -63,10 +63,14 @@ def apply_filter(name, *args):
     \param args
         the set of arguments to pass to the plugin/callable
     '''
+    my_args = list(args)
+    rtn = None
     if name in __init__.__filters__:
         plugins = __init__.__filters__[name]
         for plugin in plugins:
-            plugin(*args)
+            rtn = plugin(*my_args)
+            my_args[0] = rtn
+    return rtn
 
 def add_action(name, plugin):
     '''

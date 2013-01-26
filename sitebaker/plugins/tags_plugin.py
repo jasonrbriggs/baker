@@ -121,7 +121,7 @@ def process_pages(pages, output_path):
     f = open(output_name, 'w+')
     f.write(str(tmp))
     f.close()
-
+    return pages
 
 add_filter('pages', process_pages)
 add_filter('post-meta', process_postmeta)

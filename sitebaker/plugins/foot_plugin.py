@@ -6,5 +6,6 @@ def process(page):
         page.template.include('foot', page.headers['foot'])
     elif page.config.has_option('templates', 'foot'):
         page.template.include('foot', page.config.get('templates', 'foot'))
+    return page
 
 add_filter('page-foot', process)

@@ -55,5 +55,6 @@ def generate_page(page):
 
 def process_commands(commands):
     commands['generate'] = generate
+    return commands
 
 add_filter('commands', process_commands)

@@ -67,6 +67,6 @@ def process(pages, output_path):
     if paths:
         for path in paths.split(','):
             process_path(path, output_path, pages)
-
+    return pages
 
 add_filter('pages', process)

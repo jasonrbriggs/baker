@@ -2,10 +2,9 @@ import os
 import re
 import time
 
-from markdown import Markdown
+import markdown2
 from proton.template import Templates
 
-md = Markdown()
 title_end_re = re.compile(r'-(-+)\s*')
 
 class Page:
@@ -82,7 +81,7 @@ class Page:
             content = self.content[title_end_re.search(self.content).end():]
         else:
             content = self.content
-        html_content = md.convert(content)
+        html_content = markdown2.markdown(content, extras=['fenced-code-blocks'])
         return html_content.replace('src="/', 'src="http://%s/' % domain)
 
     def __str__(self):

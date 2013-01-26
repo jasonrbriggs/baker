@@ -4,11 +4,10 @@ import time
 
 from pages import filter_pages, Page
 from baker import add_filter, apply_filter, do_action
-from markdown import Markdown
+import markdown2
 from proton.template import Templates
 import utils
 
-md = Markdown()
 
 def get_posts_per_page(posts):
     try:
@@ -39,7 +38,8 @@ def process_path(path, output_path, pages):
         cpage = Page()
         cpage.copy(page)
         cpage.template = index_page.template
-        cpage.template.setelement('content', md.convert(page.content), index)
+        content = apply_filter('markdown', page.content)
+        cpage.template.setelement('content', content, index)
         apply_filter('post-meta', cpage, index)
         index += 1
         count += 1
@@ -109,10 +109,12 @@ def process_pages(pages, output_path):
     if paths:
         for path in paths.split(','):
             process_path(path, output_path, pages)
+    return pages
 
 
 def process_commands(commands):
     commands['blog'] = blog_command
+    return commands
 
 
 add_filter('pages', process_pages)

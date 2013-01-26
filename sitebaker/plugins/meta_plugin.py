@@ -7,5 +7,6 @@ def process(page):
         page.template.append('head', '<meta name="keywords" content="%s" />' % page.headers['keywords'])
     if 'title' in page.headers:
         page.template.setelement('title', page.headers['title'])
+    return page
 
 add_filter('page-meta', process)

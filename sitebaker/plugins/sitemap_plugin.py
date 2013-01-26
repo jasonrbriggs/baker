@@ -23,6 +23,7 @@ def process(pages, output_path):
     f = open(os.path.join(output_path, 'sitemap.xml'), 'w+')
     f.write(out)
     f.close()
+    return pages
 
 
 add_filter('pages', process)

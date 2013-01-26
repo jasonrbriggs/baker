@@ -1,3 +1,5 @@
+import postgresql
+
 from baker import add_filter
 
 def index_command(kernel, *args):
@@ -8,6 +10,7 @@ def index_command(kernel, *args):
 
 def process_commands(commands):
     commands['index'] = index_command
+    return commands
 
 
 add_filter('commands', process_commands)
