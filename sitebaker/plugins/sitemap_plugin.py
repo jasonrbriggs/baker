@@ -16,7 +16,7 @@ def process(pages, output_path):
         pg = pages[page]
         domain = pg.config.get('site', 'domain')
         tmp.setelement('url', 'http://' + domain + '/' + pg.output_url, x)
-        tmp.setelement('lastmod', time.strftime('%Y-%m-%d', time.localtime(pg.last_modified)), x)
+        tmp.setelement('lastmod', pg.last_modified.strftime('%Y-%m-%d'), x)
         x += 1
 
     out = str(tmp)

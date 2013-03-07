@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import time
@@ -19,8 +20,8 @@ class Page:
             name = os.path.basename(path)[0:-5]
             self.full_content = open(path).read()
             statbuf = os.stat(path)
-            self.last_modified = statbuf.st_mtime
-            self.fmt_last_modified = time.strftime('%d %b, %Y', time.localtime(self.last_modified))
+            self.last_modified = datetime.datetime.fromtimestamp(statbuf.st_mtime)
+            self.fmt_last_modified = self.last_modified.strftime('%d %b, %Y')
         self.headers = { }
         self.config = config
 
@@ -52,7 +53,7 @@ class Page:
             self.template = Templates._singleton[template_name]
 
         if 'posted-on' in self.headers:
-            self.last_modified = time.mktime(time.strptime(self.headers['posted-on'], '%d %b, %Y'))
+            self.last_modified = datetime.datetime.strptime(self.headers['posted-on'], '%d %b, %Y')
             self.fmt_last_modified = self.headers['posted-on']
 
     def copy(self, other_page):

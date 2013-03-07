@@ -102,6 +102,7 @@ def blog_command(kernel, *args):
     newpath = utils.url_join(kernel.options.output, path, time.strftime('%Y/%m/%d'))
     if not os.path.exists(newpath):
         os.makedirs(newpath)
+        print('Created new blog dir %s' % newpath)
 
 
 def process_pages(pages, output_path):

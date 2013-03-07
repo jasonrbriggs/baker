@@ -1,3 +1,4 @@
+import datetime
 import os
 import time
 
@@ -27,7 +28,7 @@ def process_path(path, output_path, pages):
     last_build = last_build.replace('BST', 'GMT')
     tmp.setelement('lastbuild', last_build)
 
-    max_modified = 0
+    max_modified = sorted_posts[0].last_modified
     tmp.repeat('items', total_posts)
     for x in range(0, total_posts):
         page = sorted_posts[x]
@@ -40,7 +41,7 @@ def process_path(path, output_path, pages):
         tmp.setelement('title', page.headers['title'], x)
 
         d = time.strftime('%a, %d %b %Y', time.strptime(page.get_posted_date(), '%d %b, %Y'))
-        t = time.strftime(' %H:%M:%S %Z', time.localtime((page.last_modified))).replace('BST', 'GMT')
+        t = page.last_modified.strftime(' %H:%M:%S %Z').replace('BST', 'GMT')
         tmp.setelement('pubdate', d + t, x)
         tmp.setelement('description', '<![CDATA[%s]]>' % html_content, x)
         tmp.setelement('link', link + '.html', x)
@@ -52,11 +53,11 @@ def process_path(path, output_path, pages):
     feed_file = os.path.join(output_path, path, 'feed.xml')
     if os.path.exists(feed_file):
         statbuf = os.stat(feed_file)
-        last_modified = statbuf.st_mtime
+        last_modified = datetime.datetime.fromtimestamp(statbuf.st_mtime)
     else:
-        last_modified = 0
+        last_modified = None
 
-    if max_modified >= last_modified:
+    if not last_modified or max_modified >= last_modified:
         out = str(tmp)
         f = open(feed_file, 'w+')
         f.write(out)

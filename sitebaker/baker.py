@@ -102,7 +102,6 @@ def do_action(name, *args):
 
 
 class Kernel:
-
     def __init__(self, options):
         self.options = options
         self.templates = Templates(os.path.join(options.dir, 'theme'))
