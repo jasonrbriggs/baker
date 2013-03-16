@@ -4,7 +4,6 @@ import time
 
 from pages import filter_pages, Page
 from baker import add_filter, apply_filter, do_action
-import markdown2
 from proton.template import Templates
 import utils
 
@@ -39,6 +38,7 @@ def process_path(path, output_path, pages):
         cpage.copy(page)
         cpage.template = index_page.template
         content = apply_filter('markdown', page.content)
+
         cpage.template.setelement('content', content, index)
         apply_filter('post-meta', cpage, index)
         index += 1
