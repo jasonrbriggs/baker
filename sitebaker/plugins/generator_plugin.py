@@ -33,6 +33,8 @@ def generate_page(page):
     4. page-menu
     5. post-meta
     '''
+    if not page.template:
+        return
     print('Processing %s' % page.url)
     do_action('post-meta-reset')
     apply_filter('page-head', page)

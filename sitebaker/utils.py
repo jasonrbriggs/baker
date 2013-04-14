@@ -20,20 +20,23 @@ class Compressor:
 
 
 class PluginManager:
-    def __init__(self, folder):
-        folder = os.path.abspath(folder)
+    def __init__(self, folders):
+        to_imp = [ ]
+        for folder in folders:
+            folder = os.path.abspath(folder)
 
-        if not os.path.isdir(folder):
-            raise RuntimeError("Unable to load plugins because '%s' is not a folder" % folder)
+            if not os.path.isdir(folder):
+                raise RuntimeError("Unable to load plugins because '%s' is not a folder" % folder)
 
-        # Append the folder because we need straight access
-        sys.path.append(folder)
+            # Append the folder because we need straight access
+            sys.path.append(folder)
 
-        # Build list of folders in directory
-        to_import = [f for f in os.listdir(folder) if not f.endswith(".pyc") and not f.find('__pycache__') >= 0]
+            # Build list of folders in directory
+            to_import = [f for f in os.listdir(folder) if not f.endswith(".pyc") and not f.find('__pycache__') >= 0]
+            to_imp += to_import
 
         # Do the actual importing
-        for module in to_import:
+        for module in to_imp:
             self.__initialize_plugin(module)
 
     def __initialize_plugin(self, module):

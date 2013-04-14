@@ -8,7 +8,7 @@ import pages
 import __init__
 
 
-def load_pages(dir, output_path, configs, templates):
+def load_pages(dir, output_path, kernel):
     '''
     Find all .text files in the specified directory and return a map of Page objects, keyed by the
     url for the page.
@@ -32,8 +32,8 @@ def load_pages(dir, output_path, configs, templates):
         name = name[0:-5]
 
         url = utils.url_join(base_path, name)
-        config = utils.find_config(configs, base_path)
-        page = pages.Page(path, output_path, url, config)
+        config = utils.find_config(kernel.configs, base_path)
+        page = pages.Page(kernel, path, output_path, url, config)
         page_map[url] = page
 
     return page_map
@@ -69,7 +69,10 @@ def apply_filter(name, *args):
         plugins = __init__.__filters__[name]
         for plugin in plugins:
             rtn = plugin(*my_args)
-            my_args[0] = rtn
+            if rtn:
+                my_args[0] = rtn
+    if not rtn:
+        rtn = my_args[0]
     return rtn
 
 def add_action(name, plugin):
@@ -106,8 +109,15 @@ class Kernel:
         self.options = options
         self.templates = Templates(os.path.join(options.dir, 'theme'))
         self.configs = utils.load_configs(options.dir)
-        self.pm = utils.PluginManager(os.path.join(sys.path[0], 'plugins'))
-        self.pages = load_pages(options.dir, options.output, self.configs, self.templates)
+
+        config = utils.find_config(self.configs, '/')
+        plugin_folders = [ os.path.join(sys.path[0], 'plugins') ]
+        plugin_path = config.get('control', 'plugins_path')
+        if plugin_path is not None:
+            plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
+
+        self.pm = utils.PluginManager(plugin_folders)
+        self.pages = load_pages(options.dir, options.output, self)
         self.commands = { }
         apply_filter('commands', self.commands)
 

@@ -9,7 +9,8 @@ from proton.template import Templates
 title_end_re = re.compile(r'-(-+)\s*')
 
 class Page:
-    def __init__(self, path = None, output_path = None, url = None, config = None):
+    def __init__(self, kernel = None, path = None, output_path = None, url = None, config = None):
+        self.kernel = kernel
         self.url = url
         self.output_url = None
         self.output_path = output_path
@@ -57,6 +58,7 @@ class Page:
             self.fmt_last_modified = self.headers['posted-on']
 
     def copy(self, other_page):
+        self.kernel = other_page.kernel
         self.url = other_page.url
         self.full_content = other_page.full_content
         self.content = other_page.content
