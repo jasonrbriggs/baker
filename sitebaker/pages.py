@@ -4,7 +4,7 @@ import re
 import time
 
 import markdown2
-from proton.template import Templates
+from proton import template
 
 title_end_re = re.compile(r'-(-+)\s*')
 
@@ -51,7 +51,7 @@ class Page:
             template_name = self.config.get('templates', 'default')
 
         if template_name:
-            self.template = Templates._singleton[template_name]
+            self.template = template.get_template(template_name)
 
         if 'posted-on' in self.headers:
             self.last_modified = datetime.datetime.strptime(self.headers['posted-on'], '%d %b, %Y')

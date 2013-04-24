@@ -30,7 +30,7 @@ def process(page, index=0):
     apply_filter('pre-markdown', page)
     content = apply_filter('markdown', page.content)
     content = add_anchors(content)
-    page.template.setelement('content', content, index)
+    page.template.set_value('content', content, index)
     return page
     
 add_filter('page-markdown', process)

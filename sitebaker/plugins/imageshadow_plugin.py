@@ -2,8 +2,6 @@ from baker import add_filter
 
 def process(page):
     if 'shadow' in page.headers:
-        print('got here %s' % page.headers['shadow'])
-
         for alt in page.headers['shadow'].split(','):
             page.content = ('''
 <style type="text/css">

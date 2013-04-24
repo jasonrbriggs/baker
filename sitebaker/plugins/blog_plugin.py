@@ -4,7 +4,7 @@ import time
 
 from pages import filter_pages, Page
 from baker import add_filter, apply_filter, do_action
-from proton.template import Templates
+from proton import template
 import utils
 
 
@@ -39,7 +39,7 @@ def process_path(path, output_path, pages):
         cpage.template = index_page.template
         content = apply_filter('markdown', page.content)
 
-        cpage.template.setelement('content', content, index)
+        cpage.template.set_value('content', content, index)
         apply_filter('post-meta', cpage, index)
         index += 1
         count += 1
@@ -58,7 +58,7 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     index_page = Page()
     index_page.url = None
     index_page.copy(page_to_copy)
-    index_page.template = Templates._singleton['post.html'] #todo: replace with config
+    index_page.template = template.get_template('post.html') #todo: replace with config
 
     apply_filter('page-head', index_page)
     apply_filter('page-meta', index_page)
@@ -68,18 +68,18 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     total_pages = math.ceil(total_posts / posts_per_page) - 1
 
     if page_num > 0:
-        index_page.template.setelement('prevpage', '<< Newer posts')
+        index_page.template.set_value('prevpage', '<< Newer posts')
         if page_num - 1 == 0:
-            index_page.template.setattribute('prevpage', 'href', 'index.html')
+            index_page.template.set_attribute('prevpage', 'href', 'index.html')
         else:
-            index_page.template.setattribute('prevpage', 'href', 'index-%s.html' % (page_num - 1))
+            index_page.template.set_attribute('prevpage', 'href', 'index-%s.html' % (page_num - 1))
 
     if page_num < total_pages:
-        index_page.template.setelement('nextpage', 'Older posts >>')
-        index_page.template.setattribute('nextpage', 'href', 'index-%s.html' % (page_num + 1))
+        index_page.template.set_value('nextpage', 'Older posts >>')
+        index_page.template.set_attribute('nextpage', 'href', 'index-%s.html' % (page_num + 1))
 
     if page_num > 0 and page_num < total_pages:
-        index_page.template.setelement('pagelinksep', ' | ')
+        index_page.template.set_value('pagelinksep', ' | ')
 
     index_page.template.repeat('posts', min(posts_per_page, total_posts - count))
     return index_page
@@ -103,6 +103,31 @@ def blog_command(kernel, *args):
     if not os.path.exists(newpath):
         os.makedirs(newpath)
         print('Created new blog dir %s' % newpath)
+
+    if args and len(*args) > 0:
+        title = ' '.join(*args)
+    else:
+        title = 'Temporary post'
+
+    filename = os.path.join(newpath, title.lower().replace(' ', '-') + '.text')
+
+    if not os.path.exists(filename):
+        posted_on = time.strftime('%d %b, %Y')
+        content = '''title: %(title)s
+posted-on: %(posted-on)s
+tags:
+
+%(title)s
+%(dashes)s
+
+''' % {
+            'title' : title,
+            'posted-on' : posted_on,
+            'dashes' : ('-' * len(title))
+        }
+
+        with open(filename, 'w') as blog_file:
+            blog_file.write(content)
 
 
 def process_pages(pages, output_path):

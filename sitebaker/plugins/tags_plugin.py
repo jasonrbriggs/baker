@@ -3,7 +3,7 @@ import re
 
 from baker import add_filter, apply_filter, add_action, do_action
 from pages import Page
-from proton.template import Templates
+from proton import template
 
 split_re = re.compile(r'\s*,\s*')
 
@@ -24,14 +24,14 @@ def process_postmeta(page, index=0):
     global tag_repeat_count
 
     if 'tags' in page.headers:
-        page.template.setelement('tags', 'Tagged: ', index)
+        page.template.set_value('tags', 'Tagged: ', index)
         x = 0
         tags = split_tags(page.headers['tags'])
         page.template.repeat('taglinks', len(tags), index)
         for tag in tags:
             tag = sanitise_tag(tag)
-            page.template.setattribute('taglink', 'href', '/tags/%s.html' % tag, tag_repeat_count + x)
-            page.template.setelement('taglink', tag, tag_repeat_count + x)
+            page.template.set_attribute('taglink', 'href', '/tags/%s.html' % tag, tag_repeat_count + x)
+            page.template.set_value('taglink', tag, tag_repeat_count + x)
             x += 1
         tag_repeat_count += len(tags)
     else:
@@ -58,7 +58,7 @@ def process_pages(pages, output_path):
         os.remove(os.path.join(tag_dir, fname))
 
     for tag in tags:
-        tmp = Templates._singleton['tag.html']
+        tmp = template.get_template('tag.html')
 
         output_name = os.path.join(tag_dir, '%s.html' % tag)
 
@@ -69,7 +69,7 @@ def process_pages(pages, output_path):
             cpage = Page()
             cpage.copy(page)
             cpage.template = tmp
-            tmp.setelement('content', page.get_html_content(include_title=True), x)
+            tmp.set_value('content', page.get_html_content(include_title=True), x)
             apply_filter('post-meta', cpage, x)
             x += 1
 
@@ -78,8 +78,8 @@ def process_pages(pages, output_path):
         apply_filter('page-menu', cpage)
         apply_filter('page-foot', cpage)
 
-        tmp.setelement('title', 'Tag: %s' % tag)
-        tmp.setelement('tag', 'Tag: %s' % tag)
+        tmp.set_value('title', 'Tag: %s' % tag)
+        tmp.set_value('tag', 'Tag: %s' % tag)
 
         out = str(tmp)
         f = open(output_name, 'w+')
@@ -93,20 +93,20 @@ def process_pages(pages, output_path):
     for (name, value) in page.config.items('tags'):
         tag_classes[name] = value
 
-    tmp = Templates._singleton['tags.html']
+    tmp = template.get_template('tags.html')
     if tmp is None:
         return
 
     tmp.repeat('tags', len(tags))
     x = 0
     for tag in sorted(tags):
-        tmp.setelement('tag', tag, x)
-        tmp.setattribute('tag', 'href', '/tags/%s.html' % tag, x)
+        tmp.set_value('tag', tag, x)
+        tmp.set_attribute('tag', 'href', '/tags/%s.html' % tag, x)
         count = tag_counts[tag]
 
         for key in sorted(tag_classes, reverse=True):
             if count >= int(key):
-                tmp.setattribute('tag', 'class', tag_classes[key], x)
+                tmp.set_attribute('tag', 'class', tag_classes[key], x)
         x += 1
 
     cpage = Page()

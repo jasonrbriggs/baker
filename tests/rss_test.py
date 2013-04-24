@@ -4,7 +4,7 @@ import os
 import unittest
 from mock import Mock, MagicMock
 
-from proton.template import Templates
+from proton import template
 from sitebaker import pages
 
 file_spec = ['_CHUNK_SIZE', '__enter__', '__eq__', '__exit__',
@@ -21,8 +21,7 @@ file_spec = ['_CHUNK_SIZE', '__enter__', '__eq__', '__exit__',
 class RSSTest(unittest.TestCase):
 
     def setUp(self):
-        templates = Templates('tests')
-        templates['rss_test.xml']
+        template.get_template('rss_test.xml')
 
         mock_open = Mock(return_value = MagicMock(spec=file_spec))
         mock_open.return_value.read.return_value = 'this is a test'

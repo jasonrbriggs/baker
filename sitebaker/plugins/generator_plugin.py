@@ -44,7 +44,7 @@ def generate_page(page):
     apply_filter('post-meta', page)
     apply_filter('page-foot', page)
 
-    page.template.setattribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
+    page.template.set_attribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
     fname = page.url[1:] + '.html'
 

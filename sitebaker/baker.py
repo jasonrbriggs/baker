@@ -1,7 +1,7 @@
 import os
 import sys
 
-from proton.template import Templates
+from proton import template
 
 import utils
 import pages
@@ -107,7 +107,7 @@ def do_action(name, *args):
 class Kernel:
     def __init__(self, options):
         self.options = options
-        self.templates = Templates(os.path.join(options.dir, 'theme'))
+        template.base_dir = os.path.join(options.dir, 'theme')
         self.configs = utils.load_configs(options.dir)
 
         config = utils.find_config(self.configs, '/')
@@ -131,4 +131,4 @@ class Kernel:
             print('No such command')
             sys.exit(1)
         else:
-            self.commands[command](self, args)
+            self.commands[command](self, *args)

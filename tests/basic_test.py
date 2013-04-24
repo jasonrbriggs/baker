@@ -6,7 +6,7 @@ from mock import Mock, MagicMock
 
 import __main__
 
-from proton.template import Templates
+from proton import template
 from sitebaker import pages, baker
 
 file_spec = ['_CHUNK_SIZE', '__enter__', '__eq__', '__exit__',
@@ -23,8 +23,7 @@ file_spec = ['_CHUNK_SIZE', '__enter__', '__eq__', '__exit__',
 class HeadTest(unittest.TestCase):
 
     def setUp(self):
-        templates = Templates('tests')
-        templates['basic_test.html']
+        tmp = template.get_template('basic_test.html')
 
         mock_open = Mock(return_value = MagicMock(spec=file_spec))
         mock_open.return_value.read.return_value = 'this is a test'

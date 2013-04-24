@@ -4,7 +4,7 @@ import time
 
 from pages import filter_pages
 from baker import add_filter
-from proton.template import Templates
+from proton import template
 
 def process_path(path, output_path, pages):
     sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x : x.url[len(path)+1:len(path)+11], reverse=True)
@@ -13,20 +13,20 @@ def process_path(path, output_path, pages):
     if total_posts == 0:
         return
 
-    tmp = Templates._singleton['rss.xml']
+    tmp = template.get_template('rss.xml')
     if not tmp:
         return
 
     page = sorted_posts[0]
-    tmp.setelement('channel-title', page.config.get('feed', 'title'))
-    tmp.setelement('channel-link', page.config.get('feed', 'link'))
-    tmp.setelement('channel-description', page.config.get('feed', 'description'))
-    tmp.setelement('generator', 'SiteBaker')
+    tmp.set_value('channel-title', page.config.get('feed', 'title'))
+    tmp.set_value('channel-link', page.config.get('feed', 'link'))
+    tmp.set_value('channel-description', page.config.get('feed', 'description'))
+    tmp.set_value('generator', 'SiteBaker')
 
     last_build = time.strftime('%a, %d %b %Y %H:%M:%S %Z')
     # temporary hack
     last_build = last_build.replace('BST', 'GMT')
-    tmp.setelement('lastbuild', last_build)
+    tmp.set_value('lastbuild', last_build)
 
     max_modified = sorted_posts[0].last_modified
     tmp.repeat('items', total_posts)
@@ -38,14 +38,14 @@ def process_path(path, output_path, pages):
 
         link = page.get_permalink()
 
-        tmp.setelement('title', page.headers['title'], x)
+        tmp.set_value('title', page.headers['title'], x)
 
         d = time.strftime('%a, %d %b %Y', time.strptime(page.get_posted_date(), '%d %b, %Y'))
         t = page.last_modified.strftime(' %H:%M:%S %Z').replace('BST', 'GMT')
-        tmp.setelement('pubdate', d + t, x)
-        tmp.setelement('description', '<![CDATA[%s]]>' % html_content, x)
-        tmp.setelement('link', link + '.html', x)
-        tmp.setelement('guid', link, x)
+        tmp.set_value('pubdate', d + t, x)
+        tmp.set_value('description', '<![CDATA[%s]]>' % html_content, x)
+        tmp.set_value('link', link + '.html', x)
+        tmp.set_value('guid', link, x)
 
     if path.startswith('/'):
         path = path[1:]

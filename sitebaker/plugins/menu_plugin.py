@@ -12,11 +12,11 @@ def process(page):
             title = '%s-title' % id
             titlecfg = page.config.get('menu', title)
             if titlecfg:
-                page.template.setelement('menulink', titlecfg, x)
+                page.template.set_value('menulink', titlecfg, x)
             else:   
-                page.template.setelement('menulink', id, x)
-            page.template.setattribute('menulink', 'id', id, x)
-            page.template.setattribute('menulink', 'href', link, x)
+                page.template.set_value('menulink', id, x)
+            page.template.set_attribute('menulink', 'id', id, x)
+            page.template.set_attribute('menulink', 'href', link, x)
             x += 1
     return page
             
