@@ -132,9 +132,11 @@ tags:
 
 def process_pages(pages, output_path):
     paths = list(pages.values())[0].config.get('blog', 'paths')
+    print('Generating blog index pages')
     if paths:
         for path in paths.split(','):
             process_path(path, output_path, pages)
+    print('  - complete')
     return pages
 
 

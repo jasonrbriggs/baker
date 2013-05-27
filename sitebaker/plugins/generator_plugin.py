@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from baker import add_filter, apply_filter, do_action
@@ -14,7 +15,7 @@ def generate(kernel, *args):
     '''
     print('Processing pages')
     for page in kernel.pages.values():
-        generate_page(page)
+        generate_page(kernel, page)
 
     print('Applying pages filter')
     apply_filter('pages', kernel.pages, kernel.options.output)
@@ -24,7 +25,7 @@ def generate(kernel, *args):
     comp.compress_files()
     print('Generation complete')
 
-def generate_page(page):
+def generate_page(kernel, page):
     '''
     Internal generator called for each page which applies the following filters (before writing the html output):
     1. page-head
@@ -35,7 +36,18 @@ def generate_page(page):
     '''
     if not page.template:
         return
-    print('Processing %s' % page.url)
+
+    fname = page.url[1:] + '.html'
+    output_path = os.path.join(page.output_path, fname)
+
+    if os.path.exists(output_path):
+        statbuf = os.stat(output_path)
+        last_modified = datetime.datetime.fromtimestamp(statbuf.st_mtime)
+    else:
+        last_modified = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+
+    page.output_url = fname
+
     do_action('post-meta-reset')
     apply_filter('page-head', page)
     apply_filter('page-meta', page)
@@ -44,14 +56,14 @@ def generate_page(page):
     apply_filter('post-meta', page)
     apply_filter('page-foot', page)
 
+    if last_modified > page.last_modified and kernel.options.force == 'false':
+        return
+
+    print('Processing %s' % page.url)
     page.template.set_attribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
-    fname = page.url[1:] + '.html'
-
-    page.output_url = fname
-
     out = str(page.template)
-    f = open(os.path.join(page.output_path, fname), 'w+')
+    f = open(output_path, 'w+')
     f.write(out)
     f.close()
 
