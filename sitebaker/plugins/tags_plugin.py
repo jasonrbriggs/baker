@@ -7,6 +7,7 @@ from proton import template
 
 split_re = re.compile(r'\s*,\s*')
 
+
 def reset():
     global tag_repeat_count
     tag_repeat_count = 0
@@ -27,7 +28,7 @@ def process_postmeta(page, index=0):
         page.template.set_value('tags', 'Tagged: ', index)
         x = 0
         tags = split_tags(page.headers['tags'])
-        page.template.repeat('taglinks', len(tags), index)
+        page.template.repeat('taglinks', len(tags), tag_repeat_count)
         for tag in tags:
             tag = sanitise_tag(tag)
             page.template.set_attribute('taglink', 'href', '/tags/%s.html' % tag, tag_repeat_count + x)
@@ -39,14 +40,15 @@ def process_postmeta(page, index=0):
 
 
 def process_pages(pages, output_path):
-    tags = { }
+    tags = {}
 
+    print('Generating tag index pages')
     for page in pages.values():
         if 'tags' in page.headers:
             for tag in split_tags(page.headers['tags']):
                 tag = sanitise_tag(tag)
                 if tag not in tags:
-                    tags[tag] = [ ]
+                    tags[tag] = []
                 tags[tag].append(page)
 
     tag_dir = os.path.join(output_path, 'tags')
@@ -65,7 +67,7 @@ def process_pages(pages, output_path):
         tmp.repeat('posts', len(tags[tag]))
         x = 0
         do_action('post-meta-reset')
-        for page in sorted(tags[tag], key=lambda x : x.last_modified, reverse=True):
+        for page in sorted(tags[tag], key=lambda x: x.last_modified, reverse=True):
             cpage = Page()
             cpage.copy(page)
             cpage.template = tmp
@@ -86,9 +88,9 @@ def process_pages(pages, output_path):
         f.write(out)
         f.close()
 
-    tag_counts = {k:len(v) for k, v in tags.items()}
+    tag_counts = {k: len(v) for k, v in tags.items()}
 
-    tag_classes = { }
+    tag_classes = {}
     page = next(iter(pages.values()))
     for (name, value) in page.config.items('tags'):
         tag_classes[name] = value
@@ -121,6 +123,9 @@ def process_pages(pages, output_path):
     f = open(output_name, 'w+')
     f.write(str(tmp))
     f.close()
+
+    print('  - complete')
+
     return pages
 
 add_filter('pages', process_pages)
