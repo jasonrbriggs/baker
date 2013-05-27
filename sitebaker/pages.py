@@ -1,9 +1,8 @@
 import datetime
 import os
 import re
-import time
 
-import markdown2
+from baker import apply_filter
 from proton import template
 
 title_end_re = re.compile(r'-(-+)\s*')
@@ -54,7 +53,6 @@ class Page:
             self.template = template.get_template(template_name)
 
         if 'posted-on' in self.headers:
-            self.last_modified = datetime.datetime.strptime(self.headers['posted-on'], '%d %b, %Y')
             self.fmt_last_modified = self.headers['posted-on']
 
     def copy(self, other_page):
@@ -84,7 +82,7 @@ class Page:
             content = self.content[title_end_re.search(self.content).end():]
         else:
             content = self.content
-        html_content = markdown2.markdown(content, extras=['fenced-code-blocks'])
+        html_content = apply_filter('markdown', content)
         return html_content.replace('src="/', 'src="http://%s/' % domain)
 
     def __str__(self):
