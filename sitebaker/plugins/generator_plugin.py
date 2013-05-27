@@ -17,7 +17,6 @@ def generate(kernel, *args):
     for page in kernel.pages.values():
         generate_page(kernel, page)
 
-    print('Applying pages filter')
     apply_filter('pages', kernel.pages, kernel.options.output)
 
     print('Compressing files')
@@ -59,7 +58,7 @@ def generate_page(kernel, page):
     if last_modified > page.last_modified and kernel.options.force == 'false':
         return
 
-    print('Processing %s' % page.url)
+    print('  - %s' % page.url)
     page.template.set_attribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
     out = str(page.template)
