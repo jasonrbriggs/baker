@@ -13,19 +13,22 @@ import __init__
 class Kernel:
     def __init__(self, options):
         self.options = options
-        template.base_dir = os.path.join(options.dir, 'theme')
-        self.configs = utils.load_configs(options.dir)
         self.version = __init__.__version__
-
-        config = utils.find_config(self.configs, '/')
         plugin_folders = [os.path.join(sys.path[0], 'plugins')]
-        if config is not None:
-            plugin_path = config.get('control', 'plugins_path')
-            if plugin_path is not None:
-                plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
+
+        if os.path.exists('site.ini'):
+            template.base_dir = os.path.join(options.dir, 'theme')
+            self.configs = utils.load_configs(options.dir)
+            config = utils.find_config(self.configs, '/')
+            if config is not None:
+                plugin_path = config.get('control', 'plugins_path')
+                if plugin_path is not None:
+                    plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
 
         self.pm = utils.PluginManager(plugin_folders)
-        self.pages = load_pages(options.dir, options.output, self)
+
+        if os.path.exists('site.ini'):
+            self.pages = load_pages(options.dir, options.output, self)
         self.commands = {}
         apply_filter('commands', self.commands)
 

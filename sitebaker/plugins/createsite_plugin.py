@@ -287,11 +287,11 @@ def createsite(kernel, *args):
         sys.exit(1)
 
     path = args[0][0]
+    print('Creating new site at %s' % path)
     os.makedirs(path)
     os.makedirs(os.path.join(path, 'theme'))
     os.makedirs(os.path.join(path, 'tags'))
     os.makedirs(os.path.join(path, 'resources'))
-
     generate_files(path)
 
 
