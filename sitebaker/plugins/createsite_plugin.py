@@ -139,6 +139,26 @@ default_tag = '''
 </html>
 '''
 
+default_rss = '''
+<?xml version="1.0"?>
+<rss version="2.0">
+    <channel>
+        <title eid="channel-title"></title>
+        <link eid="channel-link"></link>
+        <description eid="channel-description"></description>
+        <lastBuildDate eid="lastbuild"></lastBuildDate>
+        <generator eid="generator">Weid="journal" Editor 2.0</generator>
+        <item rid="items">
+            <title eid="title"></title>
+            <link eid="link"></link>
+            <description eid="description"></description>
+            <pubDate eid="pubdate"></pubDate>
+            <guid eid="guid"></guid>
+        </item>
+    </channel>
+</rss>
+'''
+
 default_text = '''
 title: [a page title]
 template: index.html
@@ -250,13 +270,14 @@ def generate_files(path):
     write_file(os.path.join(path, 'theme', 'post.html'), default_post)
     write_file(os.path.join(path, 'theme', 'tags.html'), default_tags)
     write_file(os.path.join(path, 'theme', 'tag.html'), default_tag)
+    write_file(os.path.join(path, 'theme', 'rss.xml'), default_rss)
     write_file(os.path.join(path, 'index.text'), default_text)
     write_file(os.path.join(path, '.htaccess'), default_htaccess)
 
 
-def newsite(kernel, *args):
+def createsite(kernel, *args):
     """
-    Generate the skeleton of a SiteBaker website.
+    Create the skeleton of a SiteBaker website.
     """
     if len(args) <= 0 or len(args[0]) <= 0:
         print('A path to generate the new site is required')
@@ -275,7 +296,7 @@ def newsite(kernel, *args):
 
 
 def process_commands(commands):
-    commands['new'] = newsite
+    commands['create'] = createsite
     return commands
 
 add_filter('commands', process_commands)
