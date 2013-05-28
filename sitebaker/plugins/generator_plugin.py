@@ -8,6 +8,8 @@ import __init__
 
 def generate(kernel, *args):
     """
+    Generate the html artifacts for the site, compress applicable files.
+
     Performs the following actions:
     1. load pages
     2. generate the output for each page

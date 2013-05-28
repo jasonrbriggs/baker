@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     kernel = baker.Kernel(options)
 
-    if not args or len(args) == 0 or args[0] == 'help':
-        kernel.help()
+    if not args or len(args) == 0:
+        kernel.usage()
     else:
         kernel.run_command(args[0], args[1:])

@@ -96,6 +96,9 @@ def write_index_page(tmp, output_path, path, page_num):
 
 
 def blog_command(kernel, *args):
+    """
+    Create the directory, and an empty .text file, for today's blog entry.
+    """
     config = utils.find_config(kernel.configs, '/')
     paths = config.get('blog', 'paths').split(',')
     path = paths[0]

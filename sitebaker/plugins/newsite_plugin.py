@@ -1,7 +1,7 @@
 import os
 import sys
 
-from events import add_filter, apply_filter, do_action
+from events import add_filter
 
 default_ini = '''
 [site]
@@ -151,9 +151,94 @@ Your content goes here. Enter using [Markdown](http://daringfireball.net/project
 
 '''
 
+default_htaccess = '''
+# compressed mime-types
+AddType image/jpg .jpg .jpggz
+AddType text/css .css .cssgz
+
+# normalized mime-types
+AddType application/javascript          js jsonp
+AddType application/json                json
+AddType image/svg+xml                   svg svgz
+AddType application/vnd.ms-fontobject   eot
+AddType application/x-font-ttf          ttf ttc
+AddType application/x-font-woff         woff
+AddType font/opentype                   otf
+AddType application/xml                 rss atom xml rdf
+AddType image/x-icon                    ico
+AddType text/cache-manifest             appcache manifest
+
+<IfModule mod_expires.c>
+    ExpiresActive on
+
+    ExpiresDefault                          "access plus 1 month"
+
+    # cache.appcache needs re-requests in FF 3.6 (thanks Remy ~Introducing HTML5)
+    ExpiresByType text/cache-manifest       "access plus 0 seconds"
+
+    ExpiresByType text/html                 "access plus 0 seconds"
+
+    ExpiresByType application/json          "access plus 0 seconds"
+    ExpiresByType application/xml           "access plus 0 seconds"
+    ExpiresByType text/xml                  "access plus 0 seconds"
+
+    # Feed
+    ExpiresByType application/rss+xml       "access plus 1 hour"
+
+    ExpiresByType image/x-icon              "access plus 1 week"
+
+    # Media: images, video, audio
+    ExpiresByType audio/ogg                 "access plus 1 month"
+    ExpiresByType image/gif                 "access plus 1 month"
+    ExpiresByType image/jpeg                "access plus 1 month"
+    ExpiresByType image/png                 "access plus 1 month"
+
+    # Webfonts
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 month"
+    ExpiresByType application/x-font-ttf    "access plus 1 month"
+    ExpiresByType application/x-font-woff   "access plus 1 month"
+    ExpiresByType font/opentype             "access plus 1 month"
+    ExpiresByType image/svg+xml             "access plus 1 month"
+    ExpiresByType font/ttf                  "access plus 1 month"
+
+    # CSS and JavaScript
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType text/css                  "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag none
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{HTTP:Accept-Encoding} gzip
+    RewriteCond %{REQUEST_FILENAME}gz -f
+    RewriteRule (.*)\.jpg $1\.jpggz [L]
+    RewriteRule (.*)\.css $1\.cssgz [L]
+
+    # block access to site.ini
+    RewriteRule ^site.ini$ - [F]
+
+    # add your rewrite rules here
+
+</IfModule>
+
+AddEncoding gzip .jpggz
+AddEncoding gzip .cssgz
+
+AddDefaultCharset utf-8
+
+# Force UTF-8 for a number of file formats
+AddCharset utf-8 .atom .css .js .json .rss .vtt .xml
+'''
+
+
 def write_file(name, content):
     with open(name, 'w') as f:
         f.write(content)
+
 
 def generate_files(path):
     write_file(os.path.join(path, 'site.ini'), default_ini)
@@ -166,8 +251,13 @@ def generate_files(path):
     write_file(os.path.join(path, 'theme', 'tags.html'), default_tags)
     write_file(os.path.join(path, 'theme', 'tag.html'), default_tag)
     write_file(os.path.join(path, 'index.text'), default_text)
+    write_file(os.path.join(path, '.htaccess'), default_htaccess)
+
 
 def newsite(kernel, *args):
+    """
+    Generate the skeleton of a SiteBaker website.
+    """
     if len(args) <= 0 or len(args[0]) <= 0:
         print('A path to generate the new site is required')
         sys.exit(1)

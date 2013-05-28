@@ -7,3 +7,4 @@ SiteBaker.egg-info
 dist
 __pycache__
 .DS_Store
+tmp
