@@ -3,6 +3,7 @@ import gzip
 import os
 import sys
 
+
 class Compressor:
     def __init__(self, source, target):
         self.source = source
@@ -21,7 +22,7 @@ class Compressor:
 
 class PluginManager:
     def __init__(self, folders):
-        to_imp = [ ]
+        to_imp = []
         for folder in folders:
             folder = os.path.abspath(folder)
 
@@ -40,41 +41,39 @@ class PluginManager:
             self.__initialize_plugin(module)
 
     def __initialize_plugin(self, module):
-        '''
+        """
         Attempt to load the definition.
-        '''
+        """
 
         # Import works the same for py files and package modules so strip!
         if module.endswith(".py"):
-            name = module [:-3]
+            name = module[:-3]
         else:
             name = module
 
         # Do the actual import
         __import__(name)
-        #print("Loaded %s" % name)
 
     def new_instance(self, name, *args, **kwargs):
-        '''
+        """
         Creates a new instance of a definition
         name - name of the definition to create
  
         any other parameters passed will be sent to the __init__ function
         of the definition, including those passed by keyword
-        '''
-
+        """
         definition = self.definitions[name]
         return getattr(definition, definition.info["class"])(*args, **kwargs)
 
 
-def find_files(dir, sort=True, *exts):
-    rtn = [ ]
-    for root, dirs, files in os.walk(dir):
+def find_files(directory, sort=True, *exts):
+    rtn = []
+    for root, dirs, files in os.walk(directory):
         for name in files:
             if matches_exts(name, exts):
                 rtn.append((root, name))
     if sort:
-        rtn.sort(key = lambda x : os.path.getmtime(os.path.join(x[0], x[1])))
+        rtn.sort(key=lambda x: os.path.getmtime(os.path.join(x[0], x[1])))
     return rtn
 
 
@@ -91,7 +90,7 @@ def find_changed_files(source_dir, source_ext, target_dir, target_ext):
         target_name = os.path.join(target_path, base_name + target_ext)
 
         if not os.path.exists(target_path):
-            os.mkdirs(target_path)
+            os.makedirs(target_path)
 
         if not os.path.exists(target_name) or os.stat(source_name).st_mtime > os.stat(target_name).st_mtime:
             yield (source_name, target_name)
@@ -143,6 +142,7 @@ def has_section(conf, section):
     else:
         return None
 
+
 def items(conf, section):
     if conf.original_has_section(section):
         return conf.original_items(section)
@@ -151,10 +151,11 @@ def items(conf, section):
     else:
         return []
 
-def load_configs(dir):
-    configs = { }
-    length = len(dir)
-    for root, name in find_files(dir, False, '.ini'):
+
+def load_configs(directory):
+    configs = {}
+    length = len(directory)
+    for root, name in find_files(directory, False, '.ini'):
         path = os.path.join(root, name)
         name = os.path.dirname(path[length:])
 
@@ -190,7 +191,7 @@ def optional_arg(arg_default):
             parser.rargs.pop(0)
         else:
             val = arg_default
-        setattr(parser.values,option.dest,val)
+        setattr(parser.values, option.dest,val)
     return func
 
 
@@ -201,6 +202,7 @@ def __url_join(path1, path2):
         return path1 + '/' + path2
     else:
         return path1 + path2
+
 
 def url_join(*args):
     if len(args) == 0:

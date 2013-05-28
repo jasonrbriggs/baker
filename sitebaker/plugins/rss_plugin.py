@@ -2,12 +2,13 @@ import datetime
 import os
 import time
 
-from pages import filter_pages
-from baker import add_filter
+from pages import filter_pages, get_root_page
+from events import add_filter
 from proton import template
 
+
 def process_path(path, output_path, pages):
-    sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x : x.url[len(path)+1:len(path)+11], reverse=True)
+    sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x: x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = min(len(sorted_posts), 20)
 
     if total_posts == 0:
@@ -63,11 +64,16 @@ def process_path(path, output_path, pages):
         f.write(out)
         f.close()
 
+
 def process(pages, output_path):
-    paths = list(pages.values())[0].config.get('blog', 'paths')
+    root_page = get_root_page(pages, 'blog')
+    if not root_page:
+        return pages
+    paths = root_page.config.get('blog', 'paths')
     if paths:
         for path in paths.split(','):
             process_path(path, output_path, pages)
     return pages
+
 
 add_filter('pages', process)

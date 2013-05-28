@@ -1,5 +1,6 @@
-from baker import add_filter
+from events import add_filter
 from proton import template
+
 
 def process(page):
     # include the head

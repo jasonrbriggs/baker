@@ -1,4 +1,5 @@
-from baker import add_filter
+from events import add_filter
+
 
 def process(page):
     if 'shadow' in page.headers:

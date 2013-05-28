@@ -2,13 +2,16 @@ import datetime
 import os
 import re
 
-from baker import apply_filter
+from events import apply_filter
 from proton import template
+
+import utils
 
 title_end_re = re.compile(r'-(-+)\s*')
 
+
 class Page:
-    def __init__(self, kernel = None, path = None, output_path = None, url = None, config = None):
+    def __init__(self, kernel=None, path=None, output_path=None, url=None, config=None):
         self.kernel = kernel
         self.url = url
         self.output_url = None
@@ -22,7 +25,7 @@ class Page:
             statbuf = os.stat(path)
             self.last_modified = datetime.datetime.fromtimestamp(statbuf.st_mtime)
             self.fmt_last_modified = self.last_modified.strftime('%d %b, %Y')
-        self.headers = { }
+        self.headers = {}
         self.config = config
 
         if self.full_content:
@@ -88,7 +91,51 @@ class Page:
     def __str__(self):
         return 'url=%s,updated=%s' % (self.get_permalink(), self.get_posted_date())
 
+
 def filter_pages(path, pages):
     for page in pages:
         if page.url.startswith(path):
             yield page
+
+
+def load_pages(directory, output_path, kernel):
+    """
+    Find all .text files in the specified directory and return a map of Page objects, keyed by the
+    url for the page.
+
+    \param directory
+        starting directory to search
+    \param output_path
+        the directory we'll be writing output to
+    \param configs
+        the config map which we'll use to get the template for each page
+    \param templates
+        the Templates singleton
+    """
+    page_map = {}
+    length = len(directory)
+    for root, name in utils.find_files(directory, False, '.text'):
+        path = os.path.join(root, name)
+        base_path = root[length:]
+        if not base_path.startswith('/'):
+            base_path = '/' + base_path
+        name = name[0:-5]
+
+        url = utils.url_join(base_path, name)
+        config = utils.find_config(kernel.configs, base_path)
+        page = Page(kernel, path, output_path, url, config)
+        page_map[url] = page
+
+    return page_map
+
+
+def get_root_page(pages, section=None):
+    """
+    Return the root page of the pages map.
+    """
+    if len(pages.values()) == 0:
+        return None
+    root_page = list(pages.values())[0]
+    if section and not root_page.config.has_section(section):
+        return None
+    return root_page

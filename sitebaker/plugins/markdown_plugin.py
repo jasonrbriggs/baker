@@ -2,12 +2,13 @@ import re
 
 import markdown2
 
-from baker import add_filter, apply_filter
+from events import add_filter, apply_filter
 
-strong_re = re.compile(r'\<span class="c"\>###\</span\>\n\s*', re.DOTALL | re.MULTILINE)
-strong_off_re = re.compile(r'\<span class="c"\>###\</span\>')
+strong_re = re.compile(r'<span class="c">###</span>\n\s*', re.DOTALL | re.MULTILINE)
+strong_off_re = re.compile(r'<span class="c">###</span>')
 
 heading_re = re.compile(r'<h2>(.*?)</h2>')
+
 
 def markdown(content):
     content = content.replace('[break]', '<br class="clear" />')
@@ -19,6 +20,7 @@ def markdown(content):
 
     return rtn
 
+
 def add_anchors(content):
     for mat in heading_re.finditer(content):
         heading = mat.group(1)
@@ -26,12 +28,14 @@ def add_anchors(content):
         content = content.replace('<h2>%s</h2>' % heading, '<h2 id="%s">%s</h2>' % (heading_anchor, heading))
     return content
 
+
 def process(page, index=0):
     apply_filter('pre-markdown', page)
     content = apply_filter('markdown', page.content)
     content = add_anchors(content)
     page.template.set_value('content', content, index)
     return page
-    
+
+
 add_filter('page-markdown', process)
 add_filter('markdown', markdown)

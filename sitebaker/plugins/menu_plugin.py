@@ -1,4 +1,5 @@
-from baker import add_filter
+from events import add_filter
+
 
 def process(page):
     menucfg = page.config.get('menu', 'menu')

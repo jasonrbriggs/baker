@@ -1,4 +1,5 @@
-from baker import add_filter, add_action
+from events import add_filter
+
 
 def process(page, index=0):
     global tag_repeat_count

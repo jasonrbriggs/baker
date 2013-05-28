@@ -1,18 +1,19 @@
 import datetime
 import os
 
-from baker import add_filter, apply_filter, do_action
+from events import add_filter, apply_filter, do_action
 import utils
 import __init__
 
+
 def generate(kernel, *args):
-    '''
+    """
     Performs the following actions:
     1. load pages
     2. generate the output for each page
     3. apply the 'pages' global filter for all pages
     4. compress any applicable files (images, etc)
-    '''
+    """
     print('Processing pages')
     for page in kernel.pages.values():
         generate_page(kernel, page)
@@ -20,19 +21,20 @@ def generate(kernel, *args):
     apply_filter('pages', kernel.pages, kernel.options.output)
 
     print('Compressing files')
-    comp = utils.Compressor(kernel.options.dir, kernel.options.output);
+    comp = utils.Compressor(kernel.options.dir, kernel.options.output)
     comp.compress_files()
     print('Generation complete')
 
+
 def generate_page(kernel, page):
-    '''
+    """
     Internal generator called for each page which applies the following filters (before writing the html output):
     1. page-head
     2. page-meta
     3. page-markdown
     4. page-menu
     5. post-meta
-    '''
+    """
     if not page.template:
         return
 
@@ -65,6 +67,7 @@ def generate_page(kernel, page):
     f = open(output_path, 'w+')
     f.write(out)
     f.close()
+
 
 def process_commands(commands):
     commands['generate'] = generate

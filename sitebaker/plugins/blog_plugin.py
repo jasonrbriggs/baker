@@ -2,8 +2,8 @@ import math
 import os
 import time
 
-from pages import filter_pages, Page
-from baker import add_filter, apply_filter, do_action
+from pages import filter_pages, Page, get_root_page
+from events import add_filter, apply_filter, do_action
 from proton import template
 import utils
 
@@ -15,7 +15,7 @@ def get_posts_per_page(posts):
         return 5
 
 def process_path(path, output_path, pages):
-    sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x : x.url[len(path)+1:len(path)+11], reverse=True)
+    sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x: x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = len(sorted_posts)
 
     if total_posts == 0:
@@ -58,7 +58,7 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     index_page = Page()
     index_page.url = None
     index_page.copy(page_to_copy)
-    index_page.template = template.get_template('post.html') #todo: replace with config
+    index_page.template = template.get_template('post.html')
 
     apply_filter('page-head', index_page)
     apply_filter('page-meta', index_page)
@@ -121,9 +121,9 @@ tags:
 %(dashes)s
 
 ''' % {
-            'title' : title,
-            'posted-on' : posted_on,
-            'dashes' : ('-' * len(title))
+            'title': title,
+            'posted-on': posted_on,
+            'dashes': ('-' * len(title))
         }
 
         with open(filename, 'w') as blog_file:
@@ -131,7 +131,10 @@ tags:
 
 
 def process_pages(pages, output_path):
-    paths = list(pages.values())[0].config.get('blog', 'paths')
+    root_page = get_root_page(pages, 'blog')
+    if not root_page:
+        return pages
+    paths = root_page.config.get('blog', 'paths')
     print('Generating blog index pages')
     if paths:
         for path in paths.split(','):

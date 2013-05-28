@@ -7,7 +7,7 @@ from mock import Mock, MagicMock
 import __main__
 
 from proton import template
-from sitebaker import pages, baker
+from sitebaker import pages
 
 file_spec = ['_CHUNK_SIZE', '__enter__', '__eq__', '__exit__',
              '__format__', '__ge__', '__gt__', '__hash__', '__iter__', '__le__',

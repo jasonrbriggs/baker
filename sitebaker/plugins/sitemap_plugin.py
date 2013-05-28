@@ -1,7 +1,7 @@
 import os
 
 from proton import template
-from baker import add_filter
+from events import add_filter
 
 
 def process(pages, output_path):

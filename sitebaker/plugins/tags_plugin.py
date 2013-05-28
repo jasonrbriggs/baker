@@ -1,8 +1,8 @@
 import os
 import re
 
-from baker import add_filter, apply_filter, add_action, do_action
-from pages import Page
+from events import add_filter, apply_filter, add_action, do_action
+from pages import Page, get_root_page
 from proton import template
 
 split_re = re.compile(r'\s*,\s*')
@@ -40,6 +40,13 @@ def process_postmeta(page, index=0):
 
 
 def process_pages(pages, output_path):
+    root_page = get_root_page(pages)
+    if not root_page:
+        return pages
+
+    index_title = root_page.config.get('tags', 'index_title')
+    tag_title = root_page.config.get('tags', 'title')
+
     tags = {}
 
     print('Generating tag index pages')
@@ -80,8 +87,8 @@ def process_pages(pages, output_path):
         apply_filter('page-menu', cpage)
         apply_filter('page-foot', cpage)
 
-        tmp.set_value('title', 'Tag: %s' % tag)
-        tmp.set_value('tag', 'Tag: %s' % tag)
+        tmp.set_value('title', tag_title % tag)
+        tmp.set_value('tag', tag_title % tag)
 
         out = str(tmp)
         f = open(output_name, 'w+')
@@ -93,7 +100,8 @@ def process_pages(pages, output_path):
     tag_classes = {}
     page = next(iter(pages.values()))
     for (name, value) in page.config.items('tags'):
-        tag_classes[name] = value
+        if name.isdigit():
+            tag_classes[name] = value
 
     tmp = template.get_template('tags.html')
     if tmp is None:
@@ -118,6 +126,8 @@ def process_pages(pages, output_path):
     apply_filter('page-meta', cpage)
     apply_filter('page-menu', cpage)
     apply_filter('page-foot', cpage)
+
+    tmp.set_value('title', index_title)
 
     output_name = os.path.join(tag_dir, 'index.html')
     f = open(output_name, 'w+')
