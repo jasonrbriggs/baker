@@ -58,6 +58,14 @@ class Page:
         if 'posted-on' in self.headers:
             self.fmt_last_modified = self.headers['posted-on']
 
+        # default to html content (TODO: probably should handle this better)
+        if url is not None:
+            self.filename = url[1:] + '.html'
+            self.full_output_path = os.path.join(output_path, self.filename)
+        else:
+            self.filename = None
+            self.full_output_path = None
+
     def copy(self, other_page):
         self.kernel = other_page.kernel
         self.url = other_page.url

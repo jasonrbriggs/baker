@@ -32,7 +32,7 @@ setup(
     author_email = 'jasonrbriggs@gmail.com',
     platforms = ['any'],
     packages = ['sitebaker', 'sitebaker.plugins'],
-    install_requires = ['markdown2>=2.1.0', 'proton>=0.8.3', 'py-postgresql>=1.1.0', 'Pygments>=1.6rc1'],
+    install_requires = ['markdown2>=2.1.0', 'proton>=0.8.4', 'py-postgresql>=1.1.0', 'Pygments>=1.6rc1'],
     tests_require = ['mock'],
     test_suite = 'test',
     scripts = ['./baker'],

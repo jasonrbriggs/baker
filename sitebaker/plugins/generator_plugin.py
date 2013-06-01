@@ -40,16 +40,13 @@ def generate_page(kernel, page):
     if not page.template:
         return
 
-    fname = page.url[1:] + '.html'
-    output_path = os.path.join(page.output_path, fname)
-
-    if os.path.exists(output_path):
-        statbuf = os.stat(output_path)
+    if os.path.exists(page.full_output_path):
+        statbuf = os.stat(page.full_output_path)
         last_modified = datetime.datetime.fromtimestamp(statbuf.st_mtime)
     else:
         last_modified = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
 
-    page.output_url = fname
+    page.output_url = page.filename
 
     do_action('post-meta-reset')
     apply_filter('page-head', page)
@@ -66,7 +63,7 @@ def generate_page(kernel, page):
     page.template.set_attribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
     out = str(page.template)
-    f = open(output_path, 'w+')
+    f = open(page.full_output_path, 'w+')
     f.write(out)
     f.close()
 

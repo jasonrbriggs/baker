@@ -14,7 +14,10 @@ def process(pages, output_path):
     for page in sorted(pages):
         pg = pages[page]
         domain = pg.config.get('site', 'domain')
-        tmp.set_value('url', 'http://' + domain + '/' + pg.output_url, x)
+        if pg.output_url is not None:
+            tmp.set_value('url', 'http://' + domain + '/' + pg.output_url, x)
+        else:
+            tmp.set_value('url', 'http://' + domain + '/' + pg.url, x)
         tmp.set_value('lastmod', pg.last_modified.strftime('%Y-%m-%d'), x)
         x += 1
 
