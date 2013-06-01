@@ -37,6 +37,10 @@ def process_path(path, output_path, pages):
         cpage = Page()
         cpage.copy(page)
         cpage.template = index_page.template
+
+        # TODO: this isn't right, need to fix later
+        apply_filter('pre-markdown', cpage)
+
         content = apply_filter('markdown', page.content)
 
         cpage.template.set_value('content', content, index)

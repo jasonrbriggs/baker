@@ -4,7 +4,7 @@ from events import add_filter
 def process(page):
     if 'shadow' in page.headers:
         for alt in page.headers['shadow'].split(','):
-            page.content = ('''
+            page.template.append('head', '''
 <style type="text/css">
 [alt="%s"] {
 -moz-box-shadow: 4px 4px 5px #aaaaaa;
@@ -16,6 +16,6 @@ box-shadow: 4px 4px 5px #aaaaaa;
 filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#aaaaaa');
 }
 </style>
-''' % alt) + page.content
+''' % alt)
 
 add_filter('pre-markdown', process)
