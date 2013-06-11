@@ -10,6 +10,52 @@ from events import apply_filter
 import __init__
 
 
+class PluginManager:
+    def __init__(self, folders):
+        to_imp = []
+        for folder in folders:
+            folder = os.path.abspath(folder)
+
+            if not os.path.isdir(folder):
+                raise RuntimeError("Unable to load plugins because '%s' is not a folder" % folder)
+
+            # Append the folder because we need straight access
+            sys.path.append(folder)
+
+            # Build list of folders in directory
+            to_import = [f for f in os.listdir(folder) if not f.endswith(".pyc") and not f.find('__pycache__') >= 0]
+            to_imp += to_import
+
+        # Do the actual importing
+        for module in to_imp:
+            self.__initialize_plugin(module)
+
+    def __initialize_plugin(self, module):
+        """
+        Attempt to load the definition.
+        """
+
+        # Import works the same for py files and package modules so strip!
+        if module.endswith(".py"):
+            name = module[:-3]
+        else:
+            name = module
+
+        # Do the actual import
+        __import__(name)
+
+    def new_instance(self, name, *args, **kwargs):
+        """
+        Creates a new instance of a definition
+        name - name of the definition to create
+
+        any other parameters passed will be sent to the __init__ function
+        of the definition, including those passed by keyword
+        """
+        definition = self.definitions[name]
+        return getattr(definition, definition.info["class"])(*args, **kwargs)
+
+
 class Kernel:
     def __init__(self, options):
         self.options = options
@@ -25,7 +71,7 @@ class Kernel:
                 if plugin_path is not None:
                     plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
 
-        self.pm = utils.PluginManager(plugin_folders)
+        self.pm = PluginManager(plugin_folders)
 
         if os.path.exists('site.ini'):
             self.pages = load_pages(options.dir, options.output, self)

@@ -241,6 +241,9 @@ FileETag none
     # block access to site.ini
     RewriteRule ^site.ini$ - [F]
 
+    # block access to .git
+    RewriteRule ^.git - [F]
+
     # add your rewrite rules here
 
 </IfModule>

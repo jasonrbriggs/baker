@@ -2,6 +2,9 @@ from events import add_filter
 
 
 def process(page):
+    """
+    Look for the 'shadow' header. If found, split the CSV and then append a style block for each value.
+    """
     if 'shadow' in page.headers:
         for alt in page.headers['shadow'].split(','):
             page.template.append('head', '''

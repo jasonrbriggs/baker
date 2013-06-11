@@ -31,11 +31,13 @@ def generate(kernel, *args):
 def generate_page(kernel, page):
     """
     Internal generator called for each page which applies the following filters (before writing the html output):
+
     1. page-head
     2. page-meta
     3. page-markdown
     4. page-menu
     5. post-meta
+    6. page-foot
     """
     if not page.template:
         return

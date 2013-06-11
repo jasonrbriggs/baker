@@ -1,11 +1,19 @@
-from events import add_filter
+from sitebaker.events import add_filter
+from proton import template
 
 
 def process(page):
     menucfg = page.config.get('menu', 'menu')
     if menucfg:
+        if 'menu' in page.headers:
+            tmp = template.get_template(page.headers['menu'])
+            page.template.replace('menu', tmp)
+        elif page.config.has_option('templates', 'menu'):
+            tmp = template.get_template(page.config.get('templates', 'menu'))
+            page.template.replace('menu', tmp)
+
         split = menucfg.split(',')
-        page.template.repeat('menu', len(split))
+        page.template.repeat('menulinks', len(split))
 
         x = 0
         for item in split:
