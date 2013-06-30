@@ -64,6 +64,7 @@ class Kernel:
 
         if os.path.exists('site.ini'):
             template.base_dir = os.path.join(options.dir, 'theme')
+            self.verbose_log('Loading configuration files')
             self.configs = utils.load_configs(options.dir)
             config = utils.find_config(self.configs, '/')
             if config is not None:
@@ -71,12 +72,21 @@ class Kernel:
                 if plugin_path is not None:
                     plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
 
+        self.verbose_log('Initialising plugin manager')
         self.pm = PluginManager(plugin_folders)
+        self.verbose_log('    - complete')
 
         if os.path.exists('site.ini'):
+            self.verbose_log('Loading pages')
             self.pages = load_pages(options.dir, options.output, self)
+            self.verbose_log('    - complete')
         self.commands = {}
+        self.verbose_log('Running commands filter')
         apply_filter('commands', self.commands)
+
+    def verbose_log(self, msg):
+        if self.options.verbose == 'true':
+            print(msg)
 
     def usage(self):
         print('''usage: baker [--force] <command> [<args>]
