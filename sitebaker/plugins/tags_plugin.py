@@ -89,6 +89,8 @@ def process_pages(pages, output_path):
 
         tmp.set_value('title', tag_title % tag)
         tmp.set_value('tag', tag_title % tag)
+        
+        apply_filter('tag-page', cpage)
 
         out = str(tmp)
         f = open(output_name, 'w+')
@@ -128,6 +130,8 @@ def process_pages(pages, output_path):
     apply_filter('page-foot', cpage)
 
     tmp.set_value('title', index_title)
+    
+    apply_filter('tags-index-page', cpage)
 
     output_name = os.path.join(tag_dir, 'index.html')
     f = open(output_name, 'w+')
@@ -137,6 +141,7 @@ def process_pages(pages, output_path):
     print('  - complete')
 
     return pages
+
 
 add_filter('pages', process_pages)
 add_filter('post-meta', process_postmeta)

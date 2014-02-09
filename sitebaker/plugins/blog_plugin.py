@@ -14,6 +14,7 @@ def get_posts_per_page(posts):
     except:
         return 5
 
+
 def process_path(path, output_path, pages):
     sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x: x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = len(sorted_posts)
@@ -48,14 +49,14 @@ def process_path(path, output_path, pages):
         index += 1
         count += 1
         if index >= posts_per_page:
-            write_index_page(index_page.template, output_path, path, page_num)
+            write_index_page(index_page, output_path, path, page_num)
             do_action('post-meta-reset')
             index = 0
             page_num += 1
             index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
 
     if index > 0:
-        write_index_page(index_page.template, output_path, path, page_num)
+        write_index_page(index_page, output_path, path, page_num)
 
 
 def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
@@ -89,11 +90,12 @@ def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
     return index_page
 
 
-def write_index_page(tmp, output_path, path, page_num):
+def write_index_page(index_page, output_path, path, page_num):
     page = ''
     if page_num > 0:
         page = '-%s' % page_num
-    out = str(tmp)
+    apply_filter('blog-index-page', index_page)
+    out = str(index_page.template)
     f = open(os.path.join(output_path, path, 'index%s.html' % page), 'w+')
     f.write(out)
     f.close()

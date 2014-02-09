@@ -18,6 +18,7 @@ def generate(kernel, *args):
     """
     print('Processing pages')
     for page in kernel.pages.values():
+        kernel.verbose_log('  - found file %s' % page.filename)
         generate_page(kernel, page)
 
     apply_filter('pages', kernel.pages, kernel.options.output)
@@ -40,6 +41,7 @@ def generate_page(kernel, page):
     6. page-foot
     """
     if not page.template:
+        kernel.verbose_log('       (no template, nothing to do)')
         return
 
     if os.path.exists(page.full_output_path):
@@ -59,6 +61,7 @@ def generate_page(kernel, page):
     apply_filter('page-foot', page)
 
     if last_modified > page.last_modified and kernel.options.force == 'false':
+        kernel.verbose_log('       (not processing lastmod %s > pagemod %s)' % (last_modified, page.last_modified))
         return
 
     print('  - %s' % page.url)

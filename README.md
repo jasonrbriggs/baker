@@ -1,7 +1,7 @@
 sitebaker
 =========
 
-Sitebaker is a simple static site generator using Python and the [proton](https://github.com/kwoli/proton) template engine for templating, and [markdown](http://daringfireball.net/projects/markdown/‎) for content.
+Sitebaker is a simple static site generator using Python and the [proton](https://github.com/jasonrbriggs/proton) template engine for templating, and [markdown](http://daringfireball.net/projects/markdown/‎) for content.
 
 Quick Start
 -----------

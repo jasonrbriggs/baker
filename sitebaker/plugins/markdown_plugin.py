@@ -12,7 +12,7 @@ heading_re = re.compile(r'<h2>(.*?)</h2>')
 
 def markdown(content):
     content = content.replace('[break]', '<br class="clear" />')
-    rtn = markdown2.markdown(content, extras=['fenced-code-blocks'])
+    rtn = markdown2.markdown(content, extras=['fenced-code-blocks', 'wiki-tables'])
 
     while strong_re.search(rtn):
         rtn = strong_re.sub(r'<span class="lolite">', rtn, 1)
@@ -24,7 +24,7 @@ def markdown(content):
 def add_anchors(content):
     for mat in heading_re.finditer(content):
         heading = mat.group(1)
-        heading_anchor = heading.replace(' ', '-')
+        heading_anchor = heading.replace(' ', '-').replace('"', '')
         content = content.replace('<h2>%s</h2>' % heading, '<h2 id="%s">%s</h2>' % (heading_anchor, heading))
     return content
 
