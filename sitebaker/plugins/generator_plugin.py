@@ -67,6 +67,8 @@ def generate_page(kernel, page):
     print('  - %s' % page.url)
     page.template.set_attribute('generator', 'content', 'SiteBaker v%s' % __init__.__version__)
 
+    apply_filter('pre-output', page)
+
     out = str(page.template)
     f = open(page.full_output_path, 'w+')
     f.write(out)

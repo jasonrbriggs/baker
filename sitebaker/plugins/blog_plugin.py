@@ -28,10 +28,10 @@ def process_path(path, output_path, pages):
     page_num = 0
     index = 0
 
-    index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
-
     if path.startswith('/'):
         path = path[1:]
+
+    index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page, path)
 
     do_action('post-meta-reset')
     for page in sorted_posts:
@@ -53,16 +53,16 @@ def process_path(path, output_path, pages):
             do_action('post-meta-reset')
             index = 0
             page_num += 1
-            index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page)
+            index_page = new_index_page(sorted_posts[0], page_num, count, total_posts, posts_per_page, path)
 
     if index > 0:
         write_index_page(index_page, output_path, path, page_num)
 
 
-def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page):
+def new_index_page(page_to_copy, page_num, count, total_posts, posts_per_page, path):
     index_page = Page()
-    index_page.url = None
     index_page.copy(page_to_copy)
+    index_page.url = '/' + path + '/index-%s' % count
     index_page.template = template.get_template('post.html')
 
     apply_filter('page-head', index_page)
@@ -95,6 +95,8 @@ def write_index_page(index_page, output_path, path, page_num):
     if page_num > 0:
         page = '-%s' % page_num
     apply_filter('blog-index-page', index_page)
+    apply_filter('pre-output', index_page)
+
     out = str(index_page.template)
     f = open(os.path.join(output_path, path, 'index%s.html' % page), 'w+')
     f.write(out)
