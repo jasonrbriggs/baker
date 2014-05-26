@@ -7,7 +7,7 @@ from proton import template
 
 import utils
 
-title_end_re = re.compile(r'-(-+)\s*')
+title_end_re = re.compile(r'^\-+\s*$')
 
 
 class Page:
@@ -90,7 +90,10 @@ class Page:
     def get_html_content(self, include_title=False):
         domain = self.config.get('site', 'domain')
         if not include_title:
-            content = self.content[title_end_re.search(self.content).end():]
+            if title_end_re.search(self.content) is not None:
+                content = remove_title(content)
+            else:
+                content = self.content
         else:
             content = self.content
         html_content = apply_filter('markdown', content)
@@ -105,6 +108,17 @@ def filter_pages(path, pages):
         if page.url.startswith(path):
             yield page
 
+def remove_title(content):
+    lines = content.split('\n')
+    for x in range(0, len(lines)):
+        if lines[x].rstrip() == '':
+            print('continue')
+            continue
+        if not title_end_re.match(lines[x]) and title_end_re.match(lines[x+1]):
+            return '\n'.join(lines[x+2:])
+        else:
+            return content
+            
 
 def load_pages(directory, output_path, kernel):
     """
