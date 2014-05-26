@@ -10,7 +10,7 @@ def process(page):
             metatag = '<meta name="%s" content="%s" />' % (header[5:], page.headers[header])
             page.template.append('head', metatag)
     if 'title' in page.headers:
-        page.template.set_value('title', page.headers['title'])
+        page.template.set_value('page-title', page.headers['title'])
     return page
 
 add_filter('page-meta', process)
