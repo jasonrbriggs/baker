@@ -68,13 +68,14 @@ def process_pages(pages, output_path):
 
     for tag in tags:
         tmp = template.get_template('tag.html')
+        print('  - generating tag %s' % tag)
 
         output_name = os.path.join(tag_dir, '%s.html' % tag)
 
         tmp.repeat('posts', len(tags[tag]))
         x = 0
         do_action('post-meta-reset')
-        for page in sorted(tags[tag], key=lambda x: x.last_modified, reverse=True):
+        for page in sorted(tags[tag], key=lambda x: x.last_modified, reverse=False):
             cpage = Page()
             cpage.copy(page)
             cpage.template = tmp
@@ -87,7 +88,7 @@ def process_pages(pages, output_path):
         apply_filter('page-menu', cpage)
         apply_filter('page-foot', cpage)
 
-        tmp.set_value('title', tag_title % tag)
+        tmp.set_value('page-title', tag_title % tag)
         tmp.set_value('tag', tag_title % tag)
         
         apply_filter('tag-page', cpage)
@@ -129,7 +130,7 @@ def process_pages(pages, output_path):
     apply_filter('page-menu', cpage)
     apply_filter('page-foot', cpage)
 
-    tmp.set_value('title', index_title)
+    tmp.set_value('page-title', index_title)
     
     apply_filter('tags-index-page', cpage)
 
