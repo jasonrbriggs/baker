@@ -71,6 +71,9 @@ class Kernel:
                 plugin_path = config.get('control', 'plugins_path')
                 if plugin_path is not None:
                     plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
+        else:
+            print('No site.ini found in current directory')
+            sys.exit(1)
 
         self.verbose_log('Initialising plugin manager')
         self.pm = PluginManager(plugin_folders)
