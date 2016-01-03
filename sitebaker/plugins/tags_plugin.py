@@ -50,6 +50,7 @@ def process_pages(pages, output_path):
     tags = {}
 
     print('Generating tag index pages')
+    sorted_posts = sorted(pages.values(), key=lambda x: x.last_modified, reverse=True)
     for page in pages.values():
         if 'tags' in page.headers:
             for tag in split_tags(page.headers['tags']):
@@ -75,18 +76,22 @@ def process_pages(pages, output_path):
         tmp.repeat('posts', len(tags[tag]))
         x = 0
         do_action('post-meta-reset')
-        for page in sorted(tags[tag], key=lambda x: x.last_modified, reverse=False):
+        related_pages = []
+        for page in sorted(tags[tag], key=lambda x: x.posted_on, reverse=True):
             cpage = Page()
             cpage.copy(page)
             cpage.template = tmp
             tmp.set_value('content', page.get_html_content(include_title=True), x)
             apply_filter('post-meta', cpage, x)
+            related_pages.append(cpage)
             x += 1
 
+        cpage.related_pages = related_pages
         apply_filter('page-head', cpage)
         apply_filter('page-meta', cpage)
         apply_filter('page-menu', cpage)
         apply_filter('page-foot', cpage)
+        apply_filter('pre-markdown', cpage)
 
         tmp.set_value('page-title', tag_title % tag)
         tmp.set_value('tag', tag_title % tag)

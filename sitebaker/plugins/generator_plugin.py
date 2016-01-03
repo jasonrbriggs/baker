@@ -24,7 +24,7 @@ def generate(kernel, *args):
     apply_filter('pages', kernel.pages, kernel.options.output)
 
     print('Compressing files')
-    comp = utils.Compressor(kernel.options.dir, kernel.options.output)
+    comp = utils.GZipCompressor(kernel.options.dir, kernel.options.output)
     comp.compress_files()
     print('Generation complete')
 

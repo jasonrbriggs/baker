@@ -2,22 +2,46 @@ import configparser
 import gzip
 import os
 import sys
+from subprocess import call
 
 
-class Compressor:
+class GZipCompressor:
     def __init__(self, source, target):
         self.source = source
         self.target = target
 
     def compress(self, src_ext, tgt_ext):
+        count = 0
         for src, target in find_changed_files(self.source, src_ext, self.target, tgt_ext):
             with open(src, 'rb') as f_in:
                 with gzip.open(target, 'wb', 9) as f_out:
                     f_out.writelines(f_in)
+                count += 1
+        return count
 
     def compress_files(self):
-        self.compress('.jpg', '.jpggz')
-        self.compress('.css', '.cssgz')
+        count = self.compress('.jpg', '.jpggz')
+        print('    - gzipped %s JPG files' % count)
+        count = self.compress('.css', '.cssgz')
+        print('    - gzipped %s CSS files' % count)
+
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
 
 
 def find_files(directory, sort=True, *exts):

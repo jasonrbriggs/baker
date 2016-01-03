@@ -18,6 +18,7 @@ class Page:
         self.output_path = output_path
         self.full_content = None
         self.fmt_last_modified = None
+        self.related_pages = [ ]
 
         if path:
             name = os.path.basename(path)[0:-5]
@@ -57,6 +58,7 @@ class Page:
 
         if 'posted-on' in self.headers:
             self.fmt_last_modified = self.headers['posted-on']
+            self.posted_on = self.last_modified.strptime(self.fmt_last_modified, '%d %b, %Y')
 
         # default to html content (TODO: probably should handle this better)
         if url is not None:
@@ -74,6 +76,7 @@ class Page:
         self.headers = other_page.headers
         self.template = other_page.template
         self.config = other_page.config
+        self.output_url = other_page.output_url
 
     def get_permalink(self):
         domain = self.config.get('site', 'domain')

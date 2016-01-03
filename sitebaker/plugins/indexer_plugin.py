@@ -1,6 +1,36 @@
-import postgresql
-
 from events import add_filter, apply_filter
+
+
+class PostgresDB:
+    def __init__(self, username, password, database):
+        import postgresql
+        self.db = postgresql.open('pq://%s:%s@localhost/%s' % (username, password, database))
+        
+    def delete_search(self):
+        with self.db.xact():
+            self.db.prepare('delete from search')()
+            
+    def prepare_insert_search(self):
+        self.ps = db.prepare('''insert into search (url, title, search_text, actual_text, last_modified)
+                               values ($1, $2, to_tsvector($3), $4, $5)''')
+                               
+    def insert_search(self, url, title, content, last_modified):
+        self.ps(url, title, title + "\n" + content, content, last_modified)
+
+    
+class Sqlite3DB:
+    def __init__(self, username, password, database):
+        import sqlite3
+        self.db = sqlite3.connect(database)
+        
+    def delete_search(self):
+        self.db.execute('delete from search')
+
+    def prepare_insert_search(self):
+        pass
+        
+    def insert_search(self, url, title, content, last_modified):
+        self.db.execute('insert into search (url, title, actual_text, last_modified) values (?, ?, ?, ?)', (url, title, content, last_modified))
 
 
 def get_connection(kernel):
@@ -9,9 +39,16 @@ def get_connection(kernel):
     username = conf.get('database', 'username')
     password = conf.get('database', 'password')
     database = conf.get('database', 'database')
+    
+    driver = conf.get('database', 'driver')
+    if driver == 'postgresql':
+        return PostgresDB(username, password, database)
+    elif driver == 'sqlite3':
+        return Sqlite3DB(username, password, database)
+    else:
+        raise RuntimeError('Unrecognised driver %s' % driver)
 
-    db = postgresql.open('pq://%s:%s@localhost/%s' % (username, password, database))
-    return db
+
 
 
 def index_command(kernel, *args):
@@ -22,11 +59,9 @@ def index_command(kernel, *args):
 
     db = get_connection(kernel)
 
-    with db.xact():
-        db.prepare('delete from search')()
+    db.delete_search()
 
-    ps = db.prepare('''insert into search (url, title, search_text, actual_text, last_modified)
-                       values ($1, $2, to_tsvector($3), $4, $5)''')
+    db.prepare_insert_search()
     for page in kernel.pages.values():
         with db.xact():
             url = page.url
@@ -37,7 +72,7 @@ def index_command(kernel, *args):
             if url.endswith('/index'):
                 url = url[0:-6]
             content = apply_filter('markdown', page.content)
-            ps(url, page.headers['title'], page.headers['title'] + "\n" + page.content, content, page.last_modified)
+            db.insert_search(url, page.headers['title'], page.headers['title'] + "\n" + page.content, content, page.last_modified)
 
     print('Complete')
 
