@@ -94,11 +94,11 @@ def find_parent_config(configs, path):
         return find_parent_config(configs, parent_path)
 
 
-def get_option(conf, section, option):
+def get_option(conf, section, option, **kwargs):
     if conf.original_has_option(section, option):
-        return conf.originalget(section, option)
+        return conf.originalget(section, option, **kwargs)
     elif conf.parent is not None:
-        return get_option(conf.parent, section, option)
+        return get_option(conf.parent, section, option, **kwargs)
     else:
         return None
 
