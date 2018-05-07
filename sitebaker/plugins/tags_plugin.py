@@ -76,6 +76,12 @@ def process_pages(pages, output_path):
 
         output_name = os.path.join(tag_dir, '%s.html' % tag.lower())
 
+        keywords = set()
+        for page in tags[tag]:
+            page_tags = split_tags(page.headers['tags'])
+            for page_tag in page_tags:
+                keywords.add(page_tag)
+
         tmp.repeat('posts', len(tags[tag]))
         x = 0
         do_action('post-meta-reset')
@@ -100,6 +106,8 @@ def process_pages(pages, output_path):
         tmp.set_value('tag', tag_title % tag)
 
         apply_filter('tag-page', cpage)
+
+        tmp.set_attribute('keywords', 'content', ','.join(keywords))
 
         out = str(tmp)
         f = open(output_name, 'w+')
