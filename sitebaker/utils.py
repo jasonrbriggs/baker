@@ -1,8 +1,16 @@
+import codecs
 import configparser
+import datetime
 import gzip
 import os
 import sys
 from subprocess import call
+
+
+DEFAULT_TIMEZONE = datetime.datetime.now().astimezone().strftime('%z')
+ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%S'
+ISO8601_PARSE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
+TIMEZONE_FORMAT = '%z'
 
 
 class GZipCompressor:
@@ -24,6 +32,7 @@ class GZipCompressor:
         print('    - gzipped %s JPG files' % count)
         count = self.compress('.css', '.cssgz')
         print('    - gzipped %s CSS files' % count)
+
 
 def which(program):
     import os
@@ -138,7 +147,9 @@ def load_configs(directory):
         name = os.path.dirname(path[length:])
 
         config = configparser.ConfigParser()
-        config.read_file(open(path))
+        f = codecs.open(path, 'r', encoding='utf-8')
+
+        config.read_file(f)
 
         parent_config = find_parent_config(configs, name)
         config.parent = parent_config
@@ -189,3 +200,9 @@ def url_join(*args):
         return args[0]
     else:
         return url_join(*(__url_join(args[0], args[1]),) + args[2:])
+
+
+def format_dt_iso8601(dt):
+    tz = dt.strftime(TIMEZONE_FORMAT)
+    tz = tz[0:3] + ':' + tz[3:]
+    return dt.strftime(ISO8601_FORMAT) + tz

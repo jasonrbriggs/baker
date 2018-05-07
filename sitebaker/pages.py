@@ -19,6 +19,7 @@ class Page:
         self.full_content = None
         self.fmt_last_modified = None
         self.related_pages = [ ]
+        self.posted_on = None
 
         if path:
             name = os.path.basename(path)[0:-5]
@@ -56,9 +57,12 @@ class Page:
         if template_name:
             self.template = template.get_template(template_name)
 
-        if 'posted-on' in self.headers:
+        if 'posted-time' in self.headers:
+            self.posted_on = self.last_modified.strptime(self.headers['posted-time'], utils.ISO8601_PARSE_FORMAT)
+            self.fmt_last_modified = self.posted_on.strftime('%d %b, %Y')
+        elif 'posted-on' in self.headers:
             self.fmt_last_modified = self.headers['posted-on']
-            self.posted_on = self.last_modified.strptime(self.fmt_last_modified, '%d %b, %Y')
+            self.posted_on = self.last_modified.strptime(self.fmt_last_modified + ' 00:00:00' + utils.DEFAULT_TIMEZONE, '%d %b, %Y %H:%M:%S%z')
 
         # default to html content (TODO: probably should handle this better)
         if url is not None:
@@ -85,8 +89,22 @@ class Page:
     def get_posted_date(self):
         if 'posted-on' in self.headers:
             return self.headers['posted-on']
-        elif self.fmt_last_modified:
+        elif self.fmt_last_modified is not None:
             return self.fmt_last_modified
+        elif 'posted-time' in self.headers:
+            dt = self.get_posted_datetime()
+            return dt.strftime('%d %b, %Y')
+        else:
+            return None
+
+    def get_posted_datetime(self):
+        if self.posted_on is not None:
+            return self.posted_on
+        elif 'posted-time' in self.headers:
+            posted_time = self.headers['posted-time']
+            return datetime.datetime.strptime(posted_time, utils.ISO8601_PARSE_FORMAT)
+        elif 'posted-on' in self.headers:
+            return datetime.datetime.strptime(self.headers['posted-on'] + ' 00:00:00' + utils.DEFAULT_TIMEZONE, '%d %b, %Y %H:%M:%S%z')
         else:
             return None
 
@@ -121,7 +139,7 @@ def remove_title(content):
             return '\n'.join(lines[x+2:])
         else:
             return content
-            
+
 
 def load_pages(directory, output_path, kernel):
     """

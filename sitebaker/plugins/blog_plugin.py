@@ -123,9 +123,9 @@ def blog_command(kernel, *args):
     filename = os.path.join(newpath, title.lower().replace(' ', '-') + '.text')
 
     if not os.path.exists(filename):
-        posted_on = time.strftime('%d %b, %Y')
+        posted_time = time.strftime('%Y-%m-%dT%H:%M:%S%z')
         content = '''title: %(title)s
-posted-on: %(posted-on)s
+posted-time: %(posted-time)s
 tags:
 
 %(title)s
@@ -133,7 +133,7 @@ tags:
 
 ''' % {
             'title': title,
-            'posted-on': posted_on,
+            'posted-on': posted_time,
             'dashes': ('-' * len(title))
         }
 

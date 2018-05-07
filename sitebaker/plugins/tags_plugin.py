@@ -29,12 +29,15 @@ def process_postmeta(page, index=0):
         x = 0
         tags = split_tags(page.headers['tags'])
         page.template.repeat('taglinks', len(tags), tag_repeat_count)
+        keywords = []
         for tag in tags:
+            keywords.append(tag.lower())
             tag = sanitise_tag(tag)
-            page.template.set_attribute('taglink', 'href', '/tags/%s.html' % tag, tag_repeat_count + x)
+            page.template.set_attribute('taglink', 'href', '/tags/%s.html' % tag.lower(), tag_repeat_count + x)
             page.template.set_value('taglink', tag, tag_repeat_count + x)
             x += 1
         tag_repeat_count += len(tags)
+        page.template.set_attribute('keywords', 'content', ','.join(keywords))
     else:
         page.template.hide('taglinks')
 
@@ -71,7 +74,7 @@ def process_pages(pages, output_path):
         tmp = template.get_template('tag.html')
         print('  - generating tag %s' % tag)
 
-        output_name = os.path.join(tag_dir, '%s.html' % tag)
+        output_name = os.path.join(tag_dir, '%s.html' % tag.lower())
 
         tmp.repeat('posts', len(tags[tag]))
         x = 0
@@ -95,7 +98,7 @@ def process_pages(pages, output_path):
 
         tmp.set_value('page-title', tag_title % tag)
         tmp.set_value('tag', tag_title % tag)
-        
+
         apply_filter('tag-page', cpage)
 
         out = str(tmp)
@@ -119,7 +122,7 @@ def process_pages(pages, output_path):
     x = 0
     for tag in sorted(tags):
         tmp.set_value('tag', tag, x)
-        tmp.set_attribute('tag', 'href', '/tags/%s.html' % tag, x)
+        tmp.set_attribute('tag', 'href', '/tags/%s.html' % tag.lower(), x)
         count = tag_counts[tag]
 
         for key in sorted(tag_classes, reverse=True):
@@ -136,7 +139,7 @@ def process_pages(pages, output_path):
     apply_filter('page-foot', cpage)
 
     tmp.set_value('page-title', index_title)
-    
+
     apply_filter('tags-index-page', cpage)
 
     output_name = os.path.join(tag_dir, 'index.html')
