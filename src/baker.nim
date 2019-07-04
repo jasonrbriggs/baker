@@ -6,6 +6,7 @@ import config
 import generator
 import pages
 import streams
+import strutils
 import utils
 
 let doc = """
@@ -13,13 +14,15 @@ SiteBaker. Command line static website generator.
 
 Usage:
   baker generate [--file <filename>] [--force]
+  baker indexes [--posts=<num>] <directory>
   baker dump <filename>
   baker init [<dir>]
   baker test
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version
+  -h --help       Show this screen.
+  --version       Show version
+  --posts=<posts> Posts per page [default: 10]
 """
 
 when isMainModule:
@@ -30,6 +33,14 @@ when isMainModule:
             generate($args["<filename>"])
         else:
             generateAll($args["--force"] == "true") 
+
+    elif args["indexes"]:
+        let dir = $args["<directory>"]
+        var posts = 10
+        if args["--posts"]:
+            posts = parseInt($args["--posts"])
+        generateIndexes(dir, posts)
+
 
     elif args["dump"]:
         let page = loadPage(".", $args["<filename>"])

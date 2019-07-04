@@ -2,6 +2,7 @@ import algorithm
 import lists
 import math
 import os
+import sequtils
 import strformat
 import strtabs
 import strutils
@@ -42,7 +43,7 @@ proc setAttributeFromHeader(tmp:Template, page:Page, header:string, aid:string, 
 proc setPostedTime(tmp:Template, page:Page) =
     if hasKey(page.headers, "posted-time"):
         let dt = parseDateTime(page.headers["posted-time"])
-        let dateonly = dt.format("yyyy-MM-dd")
+        let dateonly = dt.format("dd MMM, yyyy")
         let timeonly = dt.format("hh:mm:ss")
         setvalue(tmp, "post-date-time", page.headers["posted-time"])
         setattribute(tmp, "post-date-time", "datetime", page.headers["posted-time"])
@@ -63,8 +64,9 @@ proc pickBannerImage(page:var Page) =
             var banners: seq[string] = @[]
             echo "banner dir exists"
             for kind, path in walkDir(bannerdir):
-                echo "kind = " & kind.`$` & ", path = " & path
-                banners.add(path[len(rootdir)..len(path)-1])
+                if not endsWith(path, "gz"):
+                    echo "kind = " & kind.`$` & ", path = " & path
+                    banners.add(path[len(rootdir)..len(path)-1])
             sort(banners, system.cmp)
             echo banners
             echo "banners length " & len(banners).`$`
@@ -106,7 +108,7 @@ proc generateContent(page:Page, tmps:Table[string,Template]):Template =
     setvalue(content_template, "content", html)
     setPostedTime(content_template, page)
     setTagLinks(content_template, page)
-    setattribute(content_template, "permalink-url", "href", page.outputName)
+    setattribute(content_template, "permalink-url", "href", "/" & page.outputName)
     return content_template
 
 
@@ -127,34 +129,20 @@ proc generatePage(page:Page, tmps:Table[string,Template]):Template =
     # footer setup
     let foot_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "foot.html"), true, tmps)
     setBannerImage(foot_template, page)
-    setattribute(foot_template, "permalink-url", "href", page.outputName)
-
-    # page content setup
-    let content_template = generateContent(page, tmps)
+    setattribute(foot_template, "permalink-url", "href", page.outputName)    
 
     # page setup
     let page_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & ".html"), true, tmps)
+    echo "setting banner image on " & joinPath(template_dir_mappings[page.dirname], page.pageType & ".html")
     setBannerImage(page_template, page)
     replace(page_template, "head", head_template)
     replace(page_template, "header", header_template)
     replace(page_template, "footer", foot_template)
-    replace(page_template, "post-content", content_template)
 
     return page_template
 
 
-proc generate*(filename:string) =
-    var page = loadPage(".", filename)
-
-    page.outputName = replace(filename, ".text", ".html") 
-
-    if hasKey(page.headers, "type"):
-        page.pageType = page.headers["type"]
-    else:
-        page.pageType = "post"
-
-    pickBannerImage(page)
-
+proc loadTemplates(page:Page): Table[string,Template] =
     if not hasKey(template_dir_mappings, page.dirname):
         var tmpdir = findFileUp(page.dirname, "templates")
         if tmpdir == EmptyString:
@@ -163,10 +151,103 @@ proc generate*(filename:string) =
         let tmps = tables.initTable[string,Template]()
         template_mappings[page.dirname] = tmps
 
-    let tmps = template_mappings[page.dirname]
+    return template_mappings[page.dirname]
+
+
+proc writePage(name:string, tmp:Template) = 
+    var pout = open(name, fmWrite)
+    print(pout, tmp)
+    close(pout)
+
+
+proc getPrevNextPage(name:string, page_num:int, total:int):(string, string) =
+    let prev_num = page_num - 1
+    let prev_page = if prev_num > 0: "-" & prev_num.`$` else: ""
+    let prev = replace(name, ".html", prev_page & ".html")
+    let next_num = page_num + 1
+    let next = replace(name, ".html", "-" & next_num.`$` & ".html")
+    if page_num == 0:
+        return ("", next)
+    elif next_num >= total:
+        return (prev, "")
+    else:
+        return (prev, next)
+
+
+proc writeIndexPage(name:string, tmp:Template, page_num:int, total_pages:int) =
+    let (prev, next) = getPrevNextPage(name, page_num, total_pages)
+    setattribute(tmp, "prevpage", "href", "/" & prev)
+    setattribute(tmp, "nextpage", "href", "/" & next)
+
+    if page_num > 0:
+        writePage(replace(name, ".html", "-" & page_num.`$` & ".html"), tmp)
+    else:
+        writePage(name, tmp)
+
+
+proc generate*(filename:string) =
+    var page = loadPage(".", filename)
+
+    if hasKey(page.headers, "type"):
+        page.pageType = page.headers["type"]
+    else:
+        page.pageType = "post"
+
+    pickBannerImage(page)
+
+    let tmps = loadTemplates(page)
 
     let page_template = generatePage(page, tmps)
 
-    var fout = open(page.outputName, fmWrite)
-    print(fout, page_template)
-    close(fout)
+    # page content setup
+    let content_template = generateContent(page, tmps)
+    replace(page_template, "post-content", content_template)
+
+    var cout = open(replace(page.outputName, ".html", "-content.html"), fmWrite)
+    print(cout, content_template)
+    close(cout)
+
+    writePage(page.outputName, page_template)
+
+
+proc generateIndexes*(directory:string, postsPerPage:int) =
+    var files: seq[string] = @[]
+    for path in walkDirRec(directory):
+        if contains(path, "-content.html"):
+            add(files, path)
+    sort(files, system.cmp, SortOrder.Descending)
+    for f in files:
+        echo f
+
+    echo "directory " & directory
+    var page = loadPage(directory, joinPath(directory, "index.text"))
+    page.pageType = "post"
+    pickBannerImage(page)
+
+    let tmps = loadTemplates(page)
+    var page_template = generatePage(page, tmps)
+
+    let total_files = len(files)
+    let total_pages = int(round(total_files / postsPerPage))
+
+    echo "total files = " & total_files.`$`
+    echo "total pages = " & total_pages.`$`
+
+    var page_num = 0
+
+    repeat(page_template, "posts", postsPerPage)
+    var post = 0
+    for x in 0..len(files)-1:
+        let content = readFile(files[x])
+        replaceHtml(page_template, "post-content", content, indexof(post))
+
+        inc(post)
+        if post >= postsPerPage:
+            writeIndexPage(page.outputName, page_template, page_num, total_pages)
+            post = 0
+            inc(page_num)
+            page_template = generatePage(page, tmps)
+            repeat(page_template, "posts", postsPerPage)
+
+    if post > 0:
+        writeIndexPage(page.outputName, page_template, page_num, total_pages)

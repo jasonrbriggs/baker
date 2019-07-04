@@ -74,7 +74,9 @@ proc loadPage*(basedir:string, name:string):Page =
         if not startsWith(pb, "/"):
             pb = "/" & pb
 
-    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, bannerImage:EmptyString)
+    let outputName = replace(name, ".text", ".html")
+
+    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, bannerImage:EmptyString, outputName:outputName)
 
 
 proc headersToString*(page:Page):string =
