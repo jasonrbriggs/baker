@@ -36,18 +36,15 @@ proc findPathMatch*(path1, path2, originalPath2: string): string =
 
 
 proc findFileUp*(dir:string, name:string): string =
-    echo "here ;" & dir & ";"
     var d = dir
     if d == EmptyString:
         d = "."
 
     d = expandFilename(d)
     var filepath = joinPath(d, name)
-    echo "...." & filepath
     if fileExists(filepath) or dirExists(filepath):
         return filepath
     elif isRootDir(d):
-        echo "root dir..."
         return EmptyString
 
     let pardir = parentDir(d)
@@ -152,11 +149,8 @@ proc shortHash*(s:string):float64 =
     var i = 0
     for c in s:
         i += ord(c)
-        echo "c = " & c & " = " & ord(c).`$`
     var s2 = i.`$`
     var i2 = 0
-    echo "s2 = " & s2
     for c in s2:
         i2 += (ord(c) - 48)
-    echo i2.`$`
     return float64(i2) / 30.0

@@ -58,30 +58,21 @@ proc pickBannerImage(page:var Page) =
     else:
         let rootdir = getRootDir(page.dirname)
         let bannerdir = joinPath(rootdir, "img", "banners")
-        echo "got here bannerdir=" & bannerdir
-        echo "root dir = " & rootdir
         if dirExists(bannerdir):
             var banners: seq[string] = @[]
-            echo "banner dir exists"
             for kind, path in walkDir(bannerdir):
                 if not endsWith(path, "gz"):
-                    echo "kind = " & kind.`$` & ", path = " & path
                     banners.add(path[len(rootdir)..len(path)-1])
             sort(banners, system.cmp)
-            echo banners
-            echo "banners length " & len(banners).`$`
-            echo "page title " & page.headers["title"]
             let perc = shortHash(page.headers["title"])
             let pos = int(round(perc * float32(len(banners))))
             page.bannerImage = banners[len(banners)-1]
             if pos < len(banners):
                 page.bannerImage = banners[pos]
-    echo page.bannerImage
 
 
 proc setBannerImage(tmp:Template, page:Page) =
     if page.bannerImage != EmptyString:
-        echo "page banner image = " & page.bannerImage
         setattribute(tmp, "banner-image", "src", page.bannerImage)
     else:
         hide(tmp, "banner-image")
@@ -94,7 +85,6 @@ proc setTagLinks(tmp:Template, page:Page) =
         setattribute(tmp, "keywords", "content", join(tags, ","))
         repeat(tmp, "taglinks", len(tags))
         for i in 0..len(tags)-1:
-            echo ">>>>>> got here  " & i.`$`
             setvalue(tmp, "taglink", tags[i], indexof(i))
             setattribute(tmp, "taglink", "href", "/tags/" & tags[i] & ".html", indexof(i))
     else:
@@ -133,7 +123,6 @@ proc generatePage(page:Page, tmps:Table[string,Template]):Template =
 
     # page setup
     let page_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & ".html"), true, tmps)
-    echo "setting banner image on " & joinPath(template_dir_mappings[page.dirname], page.pageType & ".html")
     setBannerImage(page_template, page)
     replace(page_template, "head", head_template)
     replace(page_template, "header", header_template)
@@ -216,10 +205,7 @@ proc generateIndexes*(directory:string, postsPerPage:int) =
         if contains(path, "-content.html"):
             add(files, path)
     sort(files, system.cmp, SortOrder.Descending)
-    for f in files:
-        echo f
 
-    echo "directory " & directory
     var page = loadPage(directory, joinPath(directory, "index.text"))
     page.pageType = "post"
     pickBannerImage(page)
@@ -230,8 +216,9 @@ proc generateIndexes*(directory:string, postsPerPage:int) =
     let total_files = len(files)
     let total_pages = int(round(total_files / postsPerPage))
 
-    echo "total files = " & total_files.`$`
-    echo "total pages = " & total_pages.`$`
+    echo "Generating index"
+    echo "    - total posts = " & total_files.`$`
+    echo "    - total pages = " & total_pages.`$`
 
     var page_num = 0
 
