@@ -156,7 +156,10 @@ proc getPrevNextPage(name:string, page_num:int, total:int):(string, string) =
     let next_num = page_num + 1
     let next = replace(name, ".html", "-" & next_num.`$` & ".html")
     if page_num == 0:
-        return ("", next)
+        if next_num < total:
+            return ("", next)
+        else:
+            return ("", "")
     elif next_num >= total:
         return (prev, "")
     else:
