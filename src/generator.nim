@@ -98,7 +98,7 @@ proc generateContent(page:Page, tmps:Table[string,Template]):Template =
     setvalue(content_template, "content", html)
     setPostedTime(content_template, page)
     setTagLinks(content_template, page)
-    setattribute(content_template, "permalink-url", "href", "/" & page.outputName)
+    setattribute(content_template, "permalink-url", "href", ForwardSlash & page.outputName)
     return content_template
 
 
@@ -157,19 +157,19 @@ proc getPrevNextPage(name:string, page_num:int, total:int):(string, string) =
     let next = replace(name, ".html", "-" & next_num.`$` & ".html")
     if page_num == 0:
         if next_num < total:
-            return ("", next)
+            return (EmptyString, next)
         else:
-            return ("", "")
+            return (EmptyString, EmptyString)
     elif next_num >= total:
-        return (prev, "")
+        return (prev, EmptyString)
     else:
         return (prev, next)
 
 
 proc writeIndexPage(name:string, tmp:Template, page_num:int, total_pages:int) =
     let (prev, next) = getPrevNextPage(name, page_num, total_pages)
-    setattribute(tmp, "prevpage", "href", "/" & prev)
-    setattribute(tmp, "nextpage", "href", "/" & next)
+    setattribute(tmp, "prevpage", "href", ForwardSlash & prev)
+    setattribute(tmp, "nextpage", "href", ForwardSlash & next)
 
     if page_num > 0:
         writePage(replace(name, ".html", "-" & page_num.`$` & ".html"), tmp)

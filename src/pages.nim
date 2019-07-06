@@ -71,8 +71,8 @@ proc loadPage*(basedir:string, name:string):Page =
     var pb = dirname
     if startsWith(dirname, basedir):
         pb = substr(dirname, len(basedir))
-        if not startsWith(pb, "/"):
-            pb = "/" & pb
+        if not startsWith(pb, ForwardSlash):
+            pb = ForwardSlash & pb
 
     let outputName = replace(name, ".text", ".html")
 
@@ -82,8 +82,8 @@ proc loadPage*(basedir:string, name:string):Page =
 proc headersToString*(page:Page):string =
     var rtn = ""
     for key,val in pairs(page.headers):
-        rtn &= key & ": " & val & "\n"
-    return rtn & "\n"
+        rtn &= key & ": " & val & Newline
+    return rtn & Newline
 
 
 proc printPage*(page:Page) =

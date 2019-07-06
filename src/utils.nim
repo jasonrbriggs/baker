@@ -12,6 +12,8 @@ import os
 const
     Capitals:string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     EmptyString*:string = ""
+    ForwardSlash*:string = "/"
+    Newline*:string = "\n"
 
 
 proc isEmpty*(s:string): bool =
@@ -21,9 +23,9 @@ proc isEmpty*(s:string): bool =
 proc findPathMatch*(path1, path2, originalPath2: string): string =
     var p1 = path1
     var p2 = path2
-    if endsWith(p1, "/"):
+    if endsWith(p1, ForwardSlash):
         p1 = substr(p1, 0, len(p1)-2)
-    if endsWith(p2, "/"):
+    if endsWith(p2, ForwardSlash):
         p2 = substr(p2, 0, len(p2)-2)
     if endsWith(p1, p2):
         return substr(originalPath2, len(p2) + 1)
@@ -48,7 +50,7 @@ proc findFileUp*(dir:string, name:string): string =
         return EmptyString
 
     let pardir = parentDir(d)
-    if pardir == "." or pardir == dir or pardir == "":
+    if pardir == "." or pardir == dir or pardir == EmptyString:
         return EmptyString
 
     return findFileUp(pardir, name)
@@ -78,12 +80,12 @@ proc defaultIfEmpty*(s:string, def:string): string =
 
 proc joinUrl*(s1:string, s2:string): string =
     var s2a = s2
-    if startsWith(s2a, "/"):
+    if startsWith(s2a, ForwardSlash):
         s2a = substr(s2a, 1)
-    if endsWith(s1, "/"):
+    if endsWith(s1, ForwardSlash):
         return s1 & s2a
     else:
-        return s1 & "/" & s2a
+        return s1 & ForwardSlash & s2a
 
 
 proc loadJson*(filename:string): JsonNode =
