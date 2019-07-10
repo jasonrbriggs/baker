@@ -82,8 +82,8 @@ proc loadPage*(basedir:string, name:string):Page =
 proc headersToString*(page:Page):string =
     var rtn = ""
     for key,val in pairs(page.headers):
-        rtn &= key & ": " & val & Newline
-    return rtn & Newline
+        rtn &= key & ": " & val & NEWLINE
+    return rtn & NEWLINE
 
 
 proc printPage*(page:Page) =

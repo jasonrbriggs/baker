@@ -2,11 +2,14 @@ import os
 
 import docopt
 
+import blog
 import config
+import emoji
 import generator
 import pages
 import streams
 import strutils
+import system
 import utils
 
 let doc = """
@@ -17,12 +20,22 @@ Usage:
   baker indexes [--posts=<num>] <directory>
   baker dump <filename>
   baker init [<dir>]
+  baker micro
   baker test
 
 Options:
   -h --help       Show this screen.
+  --file          Generate a specific file.
+  --force         Force re-generation, not just new files
   --version       Show version
-  --posts=<posts> Posts per page [default: 10]
+  --posts=<posts> Posts per index page [default: 10]
+
+Available commands:
+  generate        Generate/render a file, or if no arguments given, all files with recent changes.
+  indexes         Create the index pages for posts in a given directory.
+  dump
+  init            Setup a directory to use with baker.
+
 """
 
 when isMainModule:
@@ -63,4 +76,7 @@ when isMainModule:
             fs.close()
 
     elif args["test"]:
-        echo shortHash("this is a test")
+        echo replaceEmoji("this is a test :thumbs_up: this is a test :zzz:")
+
+    elif args["micro"]:
+        microBlog()

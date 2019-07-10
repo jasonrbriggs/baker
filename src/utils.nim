@@ -13,7 +13,8 @@ const
     Capitals:string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     EmptyString*:string = ""
     ForwardSlash*:string = "/"
-    Newline*:string = "\n"
+    NEWLINE*:string = "\n"
+    DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
 
 
 proc isEmpty*(s:string): bool =
@@ -78,14 +79,18 @@ proc defaultIfEmpty*(s:string, def:string): string =
     return s
 
 
-proc joinUrl*(s1:string, s2:string): string =
-    var s2a = s2
-    if startsWith(s2a, ForwardSlash):
-        s2a = substr(s2a, 1)
-    if endsWith(s1, ForwardSlash):
-        return s1 & s2a
-    else:
-        return s1 & ForwardSlash & s2a
+proc joinUrlPaths*(ps: varargs[string]): string =
+    var paths:seq[string] = @[]
+    for p in ps:
+        if startsWith(p, ForwardSlash) and endsWith(p, ForwardSlash):
+            add(paths, substr(p, 1, len(p)-1))
+        elif startsWith(p, ForwardSlash):
+            add(paths, substr(p, 1))
+        elif endsWith(p, ForwardSlash):
+            add(paths, substr(p, 0, len(p)-1))
+        else:
+            add(paths, p)
+    return join(paths, ForwardSlash)
 
 
 proc loadJson*(filename:string): JsonNode =
@@ -142,8 +147,8 @@ proc splitPathComponents*(s:string): seq[string] =
 
 proc parseDateTime*(s:string):DateTime =
     var d = s
-    if match(s, re"^.*\:[0-9]{2}"):
-        d = s[0..len(s)-3] & ":" & s[len(s)-2..len(s)-1]
+    #if match(s, re"^.*\:[0-9]{2}"):
+    #    d = s[0..len(s)-3] & ":" & s[len(s)-2..len(s)-1]
     return parse(d, "yyyy-MM-dd\'T\'HH:mm:sszzz", utc())
 
 
