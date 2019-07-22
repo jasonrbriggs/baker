@@ -1,12 +1,27 @@
 import os
 import re
+import strutils
 import times
 
-import emoji
 import generator
 import utils
 
 let AT_LINK_RE = re.re("\\@[^@]+\\@[^\\s]+")
+
+proc blog*(title:string) =
+    let n = now()
+    let dir = joinUrlPaths("journal", n.format("yyyy/MM/dd"))
+    let name = toLowerAscii(multiReplace(title, ("\"", ""), ("'", ""), (":", ""), (" ", "-"), ("&", "and")))
+    let filepath = joinUrlPaths(dir, name) & ".text"
+
+    createDir(dir)
+    var pout = open(filepath, fmWrite)
+    write(pout, "title: " & title & "\n")
+    write(pout, "posted-time: " & formatDateTime(n) & "\n")
+    write(pout, "tags: \n")
+    write(pout, "\n\n")
+    close(pout)
+
 
 proc microBlog*() =
     var input = ""
@@ -18,10 +33,11 @@ proc microBlog*() =
             input = input & NEWLINE
         input = input & line
 
-    input = replaceEmoji(input)
+    if strip(input) == "":
+        echo "Nothing to post"
+        return
 
     let at_matches = findAll(input, AT_LINK_RE)
-    echo at_matches
 
     let n = now()
     let dir = joinUrlPaths("micro", n.format("yyyy/MM/dd"))

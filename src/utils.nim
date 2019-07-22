@@ -6,6 +6,7 @@ import streams
 import strutils
 import tables
 import times
+import timezones
 import os
 
 
@@ -15,6 +16,10 @@ const
     ForwardSlash*:string = "/"
     NEWLINE*:string = "\n"
     DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
+    RSS_PUBDATE_FORMAT*:string = "ddd, dd MMM yyyy HH:mm:ss zzz"
+
+
+let baseTimezone:TimeZone = tz"Europe/London"
 
 
 proc isEmpty*(s:string): bool =
@@ -147,9 +152,19 @@ proc splitPathComponents*(s:string): seq[string] =
 
 proc parseDateTime*(s:string):DateTime =
     var d = s
-    #if match(s, re"^.*\:[0-9]{2}"):
-    #    d = s[0..len(s)-3] & ":" & s[len(s)-2..len(s)-1]
-    return parse(d, "yyyy-MM-dd\'T\'HH:mm:sszzz", utc())
+    if not match(s, re"^.*:[0-9]{2}$"):
+        d = s[0..len(s)-3] & ":" & s[len(s)-2..len(s)-1]
+    return d.parse(DATETIME_FORMAT, baseTimezone)
+
+
+proc formatDateTimeRss*(dt:DateTime):string =
+    let ds = dt.format(RSS_PUBDATE_FORMAT)
+    let pos = ds.rfind(":")-1
+    return ds[0..pos] & ds[pos+2..len(ds)-1]
+
+
+proc formatDateTime*(dt:DateTime):string =
+    return dt.format(DATETIME_FORMAT)
 
 
 proc shortHash*(s:string):float64 =

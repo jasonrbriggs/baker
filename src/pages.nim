@@ -5,6 +5,9 @@ import strtabs
 import strutils
 import times
 
+import emoji
+import markdown
+
 import utils
 
 
@@ -20,6 +23,8 @@ type
         content*: string
         bannerImage*: string
         pageType*: string
+        tags*: seq[string]
+        htmlContent*: string
 
 
 proc hasValidHeaders(s:string):bool =
@@ -61,6 +66,8 @@ proc loadPage*(basedir:string, name:string):Page =
         hdrs = parseHeaders(ss[0])
         c = ss[1]
 
+    c = replaceEmoji(c)
+
     var (dirname, filename, ext) = splitFile(name)
 
     var dn = findPathMatch(basedir, dirname, dirname)
@@ -76,7 +83,21 @@ proc loadPage*(basedir:string, name:string):Page =
 
     let outputName = replace(name, ".text", ".html")
 
-    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, bannerImage:EmptyString, outputName:outputName)
+    var tags: seq[string] = @[]
+    if hasKey(hdrs, "tags"):
+        let ts = split(hdrs["tags"], ",")
+        for t in ts:
+            tags.add(strip(t))
+
+    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
+        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:markdown(c))
+
+
+proc initPage*(name:string, title:string, basedir:string):Page =
+    let headers = {
+        "title": title
+    }.newStringTable
+    return Page(name:name, basedir:basedir, headers:headers)
 
 
 proc headersToString*(page:Page):string =

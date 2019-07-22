@@ -8,26 +8,17 @@ import strtabs
 import strutils
 import tables
 import times
+import zip/gzipfiles
 
-import markdown
 import proton
 
 import config
+import emoji
 import pages
 import utils
 
 var template_dir_mappings = newStringTable()
 var template_mappings = tables.initTable[string,Table[string,Template]]()
-
-
-proc renderPage(page:Page) =
-    let html = markdown(page.content)
-
-    echo html
-
-
-proc generateAll*(force:bool) =
-    echo fmt"here {force}"
 
 
 proc setValueFromHeader(tmp:Template, page:Page, header:string, eid:string) =
@@ -46,7 +37,9 @@ proc setPostedTime(tmp:Template, page:Page) =
         let dateonly = dt.format("dd MMM, yyyy")
         let timeonly = dt.format("hh:mm:ss")
         setvalue(tmp, "post-date-time", page.headers["posted-time"])
+        setvalue(tmp, "micro-link", page.headers["posted-time"])
         setattribute(tmp, "post-date-time", "datetime", page.headers["posted-time"])
+        setattribute(tmp, "micro-link", "datetime", page.headers["posted-time"])
         setvalue(tmp, "post-date", dateonly)
         setvalue(tmp, "post-time", timeonly)
 
@@ -94,15 +87,15 @@ proc setTagLinks(tmp:Template, page:Page) =
 proc generateContent(page:Page, tmps:Table[string,Template]):Template =
     let content_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & "-content.html"), true, tmps)
     setValueFromHeader(content_template, page, "title", "title")
-    let html = markdown(page.content)
-    setvalue(content_template, "content", html)
+    setvalue(content_template, "content", page.htmlContent)
     setPostedTime(content_template, page)
     setTagLinks(content_template, page)
     setattribute(content_template, "permalink-url", "href", ForwardSlash & page.outputName)
+    setattribute(content_template, "micro-link", "href", ForwardSlash & page.outputName)
     return content_template
 
 
-proc generatePage(page:Page, tmps:Table[string,Template]):Template =
+proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
     # head setup
     let head_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "head.html"), true, tmps)
     setValueFromHeader(head_template, page, "title", "title")
@@ -119,15 +112,18 @@ proc generatePage(page:Page, tmps:Table[string,Template]):Template =
     # footer setup
     let foot_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "foot.html"), true, tmps)
     setBannerImage(foot_template, page)
-    setattribute(foot_template, "permalink-url", "href", page.outputName)    
+    setattribute(foot_template, "permalink-url", "href", page.outputName)
 
-    # page setup
+    setBannerImage(tmp, page)
+    replace(tmp, "head", head_template)
+    replace(tmp, "header", header_template)
+    replace(tmp, "footer", foot_template)
+
+
+
+proc generatePage(page:Page, tmps:Table[string,Template]):Template =
     let page_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & ".html"), true, tmps)
-    setBannerImage(page_template, page)
-    replace(page_template, "head", head_template)
-    replace(page_template, "header", header_template)
-    replace(page_template, "footer", foot_template)
-
+    generatePageCommon(page, tmps, page_template)
     return page_template
 
 
@@ -168,8 +164,16 @@ proc getPrevNextPage(name:string, page_num:int, total:int):(string, string) =
 
 proc writeIndexPage(name:string, tmp:Template, page_num:int, total_pages:int) =
     let (prev, next) = getPrevNextPage(name, page_num, total_pages)
-    setattribute(tmp, "prevpage", "href", ForwardSlash & prev)
-    setattribute(tmp, "nextpage", "href", ForwardSlash & next)
+    if prev != EmptyString:
+        setattribute(tmp, "prevpage", "href", ForwardSlash & prev)
+    else:
+        hide(tmp, "prevpage")
+        hide(tmp, "pagelinksep")
+    if next != EmptyString:
+        setattribute(tmp, "nextpage", "href", ForwardSlash & next)
+    else:
+        hide(tmp, "nextpage")
+        hide(tmp, "pagelinksep")
 
     if page_num > 0:
         writePage(replace(name, ".html", "-" & page_num.`$` & ".html"), tmp)
@@ -195,11 +199,29 @@ proc generate*(filename:string) =
     let content_template = generateContent(page, tmps)
     replace(page_template, "post-content", content_template)
 
+    hide(page_template, "prevpage")
+    hide(page_template, "nextpage")
+    hide(page_template, "pagelinksep")
+
     var cout = open(replace(page.outputName, ".html", "-content.html"), fmWrite)
     print(cout, content_template)
     close(cout)
 
     writePage(page.outputName, page_template)
+
+
+proc generateAll*(force:bool) =
+    let cd = getCurrentDir()
+    let cdl = len(cd)+1
+    for path in walkDirRec(cd):
+        let p = path[cdl..len(path)-1]
+        if endsWith(p, "index-page.text"):
+            continue
+        if endsWith(p, "text"):
+            let html = replace(p, ".text", ".html")
+            if force or not fileExists(html) or fileNewer(p, html):
+                echo " . " & p
+                generate(p)
 
 
 proc generateIndexes*(directory:string, postsPerPage:int) =
@@ -209,8 +231,13 @@ proc generateIndexes*(directory:string, postsPerPage:int) =
             add(files, path)
     sort(files, system.cmp, SortOrder.Descending)
 
-    var page = loadPage(directory, joinPath(directory, "index.text"))
-    page.pageType = "post"
+    var page = loadPage(directory, joinPath(directory, "index-page.text"))
+    page.name = "index"
+    page.outputName = replace(page.outputName, "index-page", "index")
+    if hasKey(page.headers, "type"):
+        page.pageType = page.headers["type"]
+    else:
+        page.pageType = "post"
     pickBannerImage(page)
 
     let tmps = loadTemplates(page)
@@ -241,3 +268,130 @@ proc generateIndexes*(directory:string, postsPerPage:int) =
 
     if post > 0:
         writeIndexPage(page.outputName, page_template, page_num, total_pages)
+
+
+proc generateTags*() =
+    let cd = getCurrentDir()
+    let cdl = len(cd)+1
+    var tagNames: seq[string] = @[]
+    var tags = tables.initTable[string,seq[string]]()
+    for path in walkDirRec(cd):
+        let p = path[cdl..len(path)-1]
+        if endsWith(p, "text"):
+            let page = loadPage(".", p)
+            if len(page.tags) > 0:
+                for tag in page.tags:
+                    if tag == EmptyString:
+                        continue
+                    let t = replace(tag, " ", "-")
+                    if not hasKey(tags, t):
+                        tags[t] = @[]
+                    tags[t].add(p) 
+                    if not (t in tagNames):
+                        tagNames.add(t)
+    sort(tagNames, system.cmp)
+
+    var page = initPage("tags", "Tags", ".")
+    let tmps = loadTemplates(page)
+
+    let tmp = gettemplate(joinPath(template_dir_mappings[page.dirname], "tags.html"), true, tmps)
+
+    repeat(tmp, "tags", len(tagNames))
+    for x in 0..len(tagNames)-1:
+        let tag = tagNames[x]
+        setvalue(tmp, "tag", tag, indexOf(x))
+        setattribute(tmp, "tag", "href", "/tags/" & toLowerAscii(tag) & ".html", indexOf(x))
+        let count = len(tags[tag])
+        if count >= 20:
+            setattribute(tmp, "tag", "class", "tag20", indexOf(x))
+        elif count >= 15:
+            setattribute(tmp, "tag", "class", "tag15", indexOf(x))
+        elif count >= 10:
+            setattribute(tmp, "tag", "class", "tag10", indexOf(x))
+        elif count >= 5:
+            setattribute(tmp, "tag", "class", "tag5", indexOf(x))
+
+    pickBannerImage(page)
+    generatePageCommon(page, tmps, tmp)
+
+    writePage("tags/index.html", tmp)
+
+    for tag in tagNames:
+        let pages: seq[string] = tags[tag]
+        var actualPages: seq[string] = @[]
+        for page in pages:
+            let p = replace(page, ".text", "-content.html")
+            if fileExists(p):
+                actualPages.add(p)
+        var tagPage = initPage(tag, tag, ".")
+        let ltag = toLowerAscii(tag)
+        let tagTmp = gettemplate(joinPath(template_dir_mappings[page.dirname], "tag.html"), true, tmps)
+        repeat(tagTmp, "posts", len(actualPages))
+
+        for x in 0..len(actualPages)-1:
+            let content = readFile(actualPages[x])
+            replaceHtml(tagTmp, "post-content", content, indexof(x))
+
+        pickBannerImage(tagPage)
+        generatePageCommon(tagPage, tmps, tagTmp)
+        writePage("tags/" & ltag & ".html", tagTmp)
+
+
+proc compressResourceFiles*(force:bool) = 
+    echo "Compressing resource files (force=" & force.`$` & ")"
+    let cd = getCurrentDir()
+    let cdi = len(cd)+1
+    for path in walkDirRec(cd):
+        if endsWith(path, "jpg") or endsWith(path, "css"):
+            let gzpath = path & "gz"
+            if force or not fileExists(gzpath) or fileNewer(path, gzpath):
+                let fin = readFile(path)
+                let gz = newGzFileStream(gzpath, fmWrite)
+                write(gz, fin)
+                gz.close()
+                echo " . " & path[cdi..len(path)-1]
+    echo "complete"
+
+
+proc generateFeed*(directory:string) =
+    var files: seq[string] = @[]
+    let cd = getCurrentDir()
+    let cdi = len(cd)+1
+    for path in walkDirRec(directory):
+        if contains(path, "-content.html"):
+            add(files, replace(path, "-content.html", ".text"))
+    sort(files, system.cmp, SortOrder.Descending)
+
+    let rootpage = loadPage(".", joinPath(directory, "index-page.text"))
+    let url = rootpage.headers["url"]
+
+    let tmps = loadTemplates(rootpage)
+    let tmp = gettemplate(joinPath(template_dir_mappings[rootpage.dirname], "rss.xml"), true, tmps)
+
+    repeat(tmp, "items", len(files))
+    setvalue(tmp, "channel-title", rootpage.headers["title"])
+    setvalue(tmp, "channel-link", url)
+    setvalue(tmp, "channel-description", rootpage.headers["description"])
+    setattribute(tmp, "atom-link", "href", joinUrlPaths(url, directory, "feed.xml"))
+
+    var x = 0
+    for file in files:
+        let page = loadPage(".", file)
+
+        let htmlUrl = joinUrlPaths(url, replace(file, ".text", ".html"))
+        let pos = indexOf(x)
+        setvalue(tmp, "title", page.headers["title"], pos)
+        setvalue(tmp, "link", htmlUrl, pos)
+        setvalue(tmp, "description", "<![CDATA[" & page.htmlContent & "]]>", pos)
+
+        let dt = parseDateTime(page.headers["posted-time"])
+        let fdt = formatDateTimeRss(dt)
+        setvalue(tmp, "pubdate", fdt, pos)
+        setvalue(tmp, "guid", replace(htmlUrl, ".html", ""), pos)
+
+        if x == 0:
+            setvalue(tmp, "lastbuild", fdt)
+
+        inc(x)
+
+    writePage(joinPath(directory, "feed.xml"), tmp)

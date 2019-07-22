@@ -2631,7 +2631,6 @@ let EMOJI_TABLE = {
 
 proc replaceEmoji*(s:string):string =
     let matches = findAll(s, EMOJI_RE)
-    echo matches
     var rtn = s
     for match in matches:
         if hasKey(EMOJI_TABLE, match):
