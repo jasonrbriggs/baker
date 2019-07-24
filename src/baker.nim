@@ -27,6 +27,7 @@ Usage:
   baker init [<dir>]
   baker micro
   baker rss <directory>
+  baker sitemap
   baker test
   baker tags
 
@@ -38,12 +39,13 @@ Options:
   --posts=<posts> Posts per index page [default: 10]
 
 Available commands:
-  compress        Compress resource files (css, jpg)
+  compress        Compress resource files (css, jpg).
   generate        Generate/render a file, or if no arguments given, all files with recent changes.
   indexes         Create the index pages for posts in a given directory.
   dump
   init            Setup a directory to use with baker.
-  tags            Generate the tag cloud directory
+  sitemap         Generate the sitemap.xml file in the root directory.
+  tags            Generate the tag cloud directory.
 """
 
 when isMainModule:
@@ -108,3 +110,6 @@ when isMainModule:
         for word in @(args["<title>"]):
             titleWords.add(word)
         blog(join(titleWords, " "))
+
+    elif args["sitemap"]:
+        generateSitemap()

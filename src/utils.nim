@@ -15,6 +15,7 @@ const
     EmptyString*:string = ""
     ForwardSlash*:string = "/"
     NEWLINE*:string = "\n"
+    DATE_FORMAT*:string = "yyyy-MM-dd"
     DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
     RSS_PUBDATE_FORMAT*:string = "ddd, dd MMM yyyy HH:mm:ss zzz"
 

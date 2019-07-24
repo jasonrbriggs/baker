@@ -2,6 +2,10 @@ import re
 import strtabs
 import strutils
 
+#[ 
+Emoji table sourced from https://pypi.org/project/emoji/ (with thanks).
+]#
+
 let EMOJI_RE = re.re(":[^:]+:", {re.reMultiLine, reDotAll})
 
 let EMOJI_TABLE = {

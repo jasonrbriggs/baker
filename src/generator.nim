@@ -291,6 +291,9 @@ proc generateTags*() =
                         tagNames.add(t)
     sort(tagNames, system.cmp)
 
+    if not dirExists("tags"):
+        createDir("tags")
+
     var page = initPage("tags", "Tags", ".")
     let tmps = loadTemplates(page)
 
@@ -395,3 +398,35 @@ proc generateFeed*(directory:string) =
         inc(x)
 
     writePage(joinPath(directory, "feed.xml"), tmp)
+
+
+proc generateSitemap*() =
+    var files: seq[string] = @[]
+    let cd = getCurrentDir()
+    let cdi = len(cd)+1
+    for path in walkDirRec(cd):
+        if endsWith(path, "-content.html") and not contains(path, "templates/"):
+            let p = replace(path, "-content.html", ".html")
+            add(files, p[cdi..len(p)-1])
+    sort(files, system.cmp, SortOrder.Descending)
+
+    var indexpage = "index-page.text"
+    if not fileExists(indexpage):
+        indexpage = "index.text"
+
+    let rootpage = loadPage(".", indexpage)
+    let url = rootpage.headers["url"]
+
+    let tmps = loadTemplates(rootpage)
+    let tmp = gettemplate(joinPath(template_dir_mappings[rootpage.dirname], "sitemap.xml"), true, tmps)
+
+    repeat(tmp, "urls", len(files))
+
+    var x = 0
+    for file in files:
+        setvalue(tmp, "url", file, indexOf(x))
+        let mt = getLastModificationTime(replace(file, ".html", ".text"))
+        setvalue(tmp, "lastmod", mt.format(DATE_FORMAT), indexOf(x))
+        inc(x)
+
+    writePage("sitemap.xml", tmp)
