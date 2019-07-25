@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Microblog</title>
+        <link>http://test.test</link>
+        <description>Test microblog</description>
+        <lastBuildDate>Wed, 10 Jul 2019 19:53:27 +0100</lastBuildDate>
+        <generator>SiteBaker</generator>
+        <atom:link href="http://test.test/micro/feed.xml" rel="self" type="application/rss+xml" />
+        <item>
+            <title>Microblog posted at 10 Jul 2019 19:53:27</title>
+            <link>http://test.test/micro/2019/07/10/195327.html</link>
+            <description><![CDATA[<p>this is another emoji test 💤</p>
+]]></description>
+            <pubDate>Wed, 10 Jul 2019 19:53:27 +0100</pubDate>
+            <guid>http://test.test/micro/2019/07/10/195327</guid>
+        </item><item>
+            <title>Microblog posted at 07 Jul 2019 19:36:38</title>
+            <link>http://test.test/micro/2019/07/07/193638.html</link>
+            <description><![CDATA[<p>this is a test @test@twitter.com</p>
+]]></description>
+            <pubDate>Sun, 07 Jul 2019 19:36:38 +0100</pubDate>
+            <guid>http://test.test/micro/2019/07/07/193638</guid>
+        </item><item>
+            <title>Microblog posted at 07 Jul 2019 19:34:09</title>
+            <link>http://test.test/micro/2019/07/07/193409.html</link>
+            <description><![CDATA[<p>this is a test 👍
+test</p>
+]]></description>
+            <pubDate>Sun, 07 Jul 2019 19:34:09 +0100</pubDate>
+            <guid>http://test.test/micro/2019/07/07/193409</guid>
+        </item><item>
+            <title>Microblog posted at 07 Jul 2019 11:49:45</title>
+            <link>http://test.test/micro/2019/07/07/114945.html</link>
+            <description><![CDATA[<p>test2
+test2
+test2</p>
+]]></description>
+            <pubDate>Sun, 07 Jul 2019 11:49:45 +0100</pubDate>
+            <guid>http://test.test/micro/2019/07/07/114945</guid>
+        </item><item>
+            <title>Microblog posted at 07 Jul 2019 11:13:09</title>
+            <link>http://test.test/micro/2019/07/07/111309.html</link>
+            <description><![CDATA[<p>test
+test
+test</p>
+]]></description>
+            <pubDate>Sun, 07 Jul 2019 11:13:09 +0100</pubDate>
+            <guid>http://test.test/micro/2019/07/07/111309</guid>
+        </item>
+    </channel>
+</rss>
