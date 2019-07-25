@@ -1,10 +1,7 @@
 .idea
 MANIFEST
 build
-SiteBaker.egg-info
-*.egg*
-*.pyc
 dist
-__pycache__
 .DS_Store
 tmp
+baker
