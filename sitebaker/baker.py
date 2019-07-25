@@ -66,9 +66,9 @@ class Kernel:
             template.base_dir = os.path.join(options.dir, 'theme')
             self.verbose_log('Loading configuration files')
             self.configs = utils.load_configs(options.dir)
-            config = utils.find_config(self.configs, '/')
-            if config is not None:
-                plugin_path = config.get('control', 'plugins_path')
+            self.config = utils.find_config(self.configs, '/')
+            if self.config is not None:
+                plugin_path = self.config.get('control', 'plugins_path')
                 if plugin_path is not None:
                     plugin_folders.append(os.path.join(os.getcwd(), plugin_path))
         else:
@@ -81,11 +81,14 @@ class Kernel:
 
         if os.path.exists('site.ini'):
             self.verbose_log('Loading pages')
-            self.pages = load_pages(options.dir, options.output, self)
+            self.load_pages()
             self.verbose_log('    - complete')
         self.commands = {}
         self.verbose_log('Running commands filter')
         apply_filter('commands', self.commands)
+
+    def load_pages(self):
+        self.pages = load_pages(self.options.dir, self.options.output, self)
 
     def verbose_log(self, msg):
         if self.options.verbose == 'true':

@@ -133,7 +133,7 @@ tags:
 
 ''' % {
             'title': title,
-            'posted-on': posted_time,
+            'posted-time': posted_time,
             'dashes': ('-' * len(title))
         }
 

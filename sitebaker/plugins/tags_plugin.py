@@ -37,12 +37,13 @@ def process_postmeta(page, index=0):
             page.template.set_value('taglink', tag, tag_repeat_count + x)
             x += 1
         tag_repeat_count += len(tags)
+        keywords.sort()
         page.template.set_attribute('keywords', 'content', ','.join(keywords))
     else:
         page.template.hide('taglinks')
 
 
-def process_pages(pages, output_path):
+def process_pages(pages, output_path):      
     root_page = get_root_page(pages)
     if not root_page:
         return pages
@@ -107,7 +108,10 @@ def process_pages(pages, output_path):
 
         apply_filter('tag-page', cpage)
 
-        tmp.set_attribute('keywords', 'content', ','.join(keywords))
+        kw = []
+        kw += keywords
+        kw.sort()
+        tmp.set_attribute('keywords', 'content', ','.join(kw))
 
         out = str(tmp)
         f = open(output_name, 'w+')

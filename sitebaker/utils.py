@@ -29,9 +29,9 @@ class GZipCompressor:
 
     def compress_files(self):
         count = self.compress('.jpg', '.jpggz')
-        print('    - gzipped %s JPG files' % count)
+        print('  - gzipped %s JPG files' % count)
         count = self.compress('.css', '.cssgz')
-        print('    - gzipped %s CSS files' % count)
+        print('  - gzipped %s CSS files' % count)
 
 
 def which(program):
@@ -206,3 +206,12 @@ def format_dt_iso8601(dt):
     tz = dt.strftime(TIMEZONE_FORMAT)
     tz = tz[0:3] + ':' + tz[3:]
     return dt.strftime(ISO8601_FORMAT) + tz
+
+
+def write_page(template, output_path, path, filename):
+    if filename.startswith('/'):
+        filename = filename[1:]
+    fname = os.path.join(output_path, path, filename)
+    with open(fname, 'w+') as f:
+        out = str(template)
+        f.write(out)

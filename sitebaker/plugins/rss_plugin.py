@@ -8,7 +8,10 @@ from proton import template
 
 
 def process_path(path, output_path, pages):
-    sorted_posts = sorted(filter_pages(path, pages.values()), key=lambda x: x.url[len(path)+1:len(path)+11], reverse=True)
+    vals = pages
+    if type(vals) == dict:
+        vals = vals.values()
+    sorted_posts = sorted(filter_pages(path, vals), key=lambda x: x.url[len(path)+1:len(path)+11], reverse=True)
     total_posts = min(len(sorted_posts), 20)
 
     if total_posts == 0:
@@ -19,6 +22,7 @@ def process_path(path, output_path, pages):
         return
 
     page = sorted_posts[0]
+
     tmp.set_value('channel-title', page.config.get('feed', 'title'))
     tmp.set_value('channel-link', page.config.get('feed', 'link'))
     tmp.set_value('channel-description', page.config.get('feed', 'description'))
@@ -39,11 +43,14 @@ def process_path(path, output_path, pages):
 
         link = page.get_permalink()
 
-        tmp.set_value('title', page.headers['title'], x)
+        if page.config.has_section('microblog'):
+            tmp.hide('title', x)
+        else:
+            tmp.set_value('title', page.headers['title'], x)
 
         d = time.strftime('%a, %d %b %Y', time.strptime(page.get_posted_date(), '%d %b, %Y'))
-        t = page.last_modified.strftime(' %H:%M:%S %Z').replace('BST', 'GMT')
-        tmp.set_value('pubdate', d + t, x)
+        t = page.get_posted_datetime().strftime(' %H:%M:%S %z')
+        tmp.set_value('pubdate', (d + t).rstrip(), x)
         tmp.set_value('description', '<![CDATA[%s]]>' % html_content, x)
         tmp.set_value('link', link + '.html', x)
         tmp.set_value('guid', link, x)
@@ -71,6 +78,7 @@ def process(pages, output_path):
         return pages
     paths = root_page.config.get('blog', 'paths')
     if paths:
+        root_page.config.remove_section('microblog')
         for path in paths.split(','):
             process_path(path, output_path, pages)
     return pages
