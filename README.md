@@ -25,7 +25,7 @@ Create a new blog entry, by running the blog command:
 
 Create a microblog entry by running:
 ```
-	baker micro
+    baker micro
 ```
 Enter the text for your microblog post and hit enter twice to end the editing process.
 

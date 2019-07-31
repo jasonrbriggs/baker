@@ -1,0 +1,8 @@
+Version 2.0.0 - July 2019
+
+* Roll version forward so that nimble doesn't grab the old python version
+
+
+Version 0.1.0 - July 2019
+
+* Initial nim version of sitebaker
