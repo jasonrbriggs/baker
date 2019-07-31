@@ -8,7 +8,7 @@ Quick Start
 
 Install Baker using the following command:
 ```
-    nimble install sitebaker
+    nimble install baker
 ```
 
 Create the skeleton of a new site by running the following:
