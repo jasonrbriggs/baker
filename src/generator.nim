@@ -84,6 +84,25 @@ proc setTagLinks(tmp:Template, page:Page) =
         hide(tmp, "taglinks")
 
 
+proc addImageShadowStyle(tmp:Template, page:Page) =
+    if hasKey(page.headers, "shadow"):
+        var images = split(page.headers["shadow"], ",")
+        for image in images:
+            appendHtml(tmp, "head", """
+<style type="text/css">
+[alt="""" & image & """"] {
+-moz-box-shadow: 4px 4px 5px #aaaaaa;
+-webkit-box-shadow: 4px 4px 5px #aaaaaa;
+box-shadow: 4px 4px 5px #aaaaaa;
+/* For IE 8 */
+-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#aaaaaa')";
+/* For IE 5.5 - 7 */
+filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#aaaaaa');
+}
+</style>
+""")
+
+
 proc generateContent(page:Page, tmps:Table[string,Template]):Template =
     let content_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & "-content.html"), true, tmps)
     setValueFromHeader(content_template, page, "title", "title")
@@ -102,6 +121,7 @@ proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
     setattribute(head_template, "generator", "content", "SiteBaker " & BakerVersion)
     setTagLinks(head_template, page)
     setPostedTime(head_template, page)
+    addImageShadowStyle(head_template, page)
 
     # header setup
     let header_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "header.html"), true, tmps)
