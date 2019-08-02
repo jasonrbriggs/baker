@@ -16,6 +16,7 @@ import config
 import emoji
 import pages
 import utils
+import whistle
 
 var template_dir_mappings = newStringTable()
 var template_mappings = tables.initTable[string,Table[string,Template]]()
@@ -88,7 +89,7 @@ proc addImageShadowStyle(tmp:Template, page:Page) =
     if hasKey(page.headers, "shadow"):
         var images = split(page.headers["shadow"], ",")
         for image in images:
-            appendHtml(tmp, "head", """
+            prependHtml(tmp, "content", """
 <style type="text/css">
 [alt="""" & image & """"] {
 -moz-box-shadow: 4px 4px 5px #aaaaaa;
@@ -103,14 +104,21 @@ filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Colo
 """)
 
 
-proc generateContent(page:Page, tmps:Table[string,Template]):Template =
+proc generateContent(page:var Page, tmps:Table[string,Template]):Template =
     let content_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & "-content.html"), true, tmps)
     setValueFromHeader(content_template, page, "title", "title")
     setvalue(content_template, "content", page.htmlContent)
     setPostedTime(content_template, page)
     setTagLinks(content_template, page)
+    addImageShadowStyle(content_template, page)
     setattribute(content_template, "permalink-url", "href", ForwardSlash & page.outputName)
     setattribute(content_template, "micro-link", "href", ForwardSlash & page.outputName)
+
+    let rootdir = getRootDir(page.dirname)    
+    addShortenedUrl(rootdir, page)
+    if page.shortLink != EmptyString:
+        setattribute(content_template, "shortlink-url", "href", ForwardSlash & page.shortLink)
+
     return content_template
 
 
@@ -121,7 +129,6 @@ proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
     setattribute(head_template, "generator", "content", "SiteBaker " & BakerVersion)
     setTagLinks(head_template, page)
     setPostedTime(head_template, page)
-    addImageShadowStyle(head_template, page)
 
     # header setup
     let header_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "header.html"), true, tmps)
@@ -227,6 +234,10 @@ proc generate*(filename:string) =
     print(cout, content_template)
     close(cout)
 
+    var shortlinkInfo = EmptyString
+    if page.shortLink != EmptyString:
+        shortLinkInfo = " (" & page.shortLink & ")"
+    echo " . " & page.outputName & shortlinkInfo
     writePage(page.outputName, page_template)
 
 
@@ -240,7 +251,6 @@ proc generateAll*(force:bool) =
         if endsWith(p, "text"):
             let html = replace(p, ".text", ".html")
             if force or not fileExists(html) or fileNewer(p, html):
-                echo " . " & p
                 generate(p)
 
 

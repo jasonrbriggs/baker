@@ -18,9 +18,20 @@ const
     DATE_FORMAT*:string = "yyyy-MM-dd"
     DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
     RSS_PUBDATE_FORMAT*:string = "ddd, dd MMM yyyy HH:mm:ss zzz"
+    ALL_CHARACTERS* = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz"
 
+var numbers = initTable[char, int]()
+var i = 0
+for x in ALL_CHARACTERS:
+    numbers[x] = i
+    i += 1
+
+numbers['l'] = 1 # typo lowercase l to 1
+numbers['I'] = 1 # typo capital I to 1
+numbers['O'] = 0 # typo capital O to 0
 
 let baseTimezone:TimeZone = tz"Europe/London"
+let urlDatePattern = re"[0-9]{4}/[0-9]{2}/[0-9]{2}"
 
 
 proc isEmpty*(s:string): bool =
@@ -177,3 +188,31 @@ proc shortHash*(s:string):float64 =
     for c in s2:
         i2 += (ord(c) - 48)
     return float64(i2) / 30.0
+
+#   RewriteRule ^u/jbMdB6g$ /journal/2018/05/09/a-question-about-tkinter-update.html [R=301,L]
+    # end of rewrite rules for short links
+
+proc numtosxg*(n:int64):string =
+    var s = ""
+    var n0 = n
+    var n1 = n
+    while n1 > 0:
+        n1 = n0 div 60
+        var i = cast[int](n0 mod 60)
+        n0 = n1
+        s = ALL_CHARACTERS[i] & s
+    return s
+
+
+proc sxgtonum*(s:string):int =
+    var n = 0
+    for c in s:
+        n = n * 60 + getOrDefault(numbers, c)
+    return n
+
+
+proc dateasnum*(url:string):int =
+    var (first, last) = findBounds(url, urlDatePattern)
+    var date = substr(url, first, last)
+    date = replace(date, "/", "")
+    return parseInt(date)

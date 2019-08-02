@@ -25,6 +25,7 @@ type
         pageType*: string
         tags*: seq[string]
         htmlContent*: string
+        shortLink*:string
 
 
 proc hasValidHeaders(s:string):bool =
@@ -90,7 +91,7 @@ proc loadPage*(basedir:string, name:string):Page =
             tags.add(strip(t))
 
     return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
-        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:markdown(c))
+        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:markdown(c), shortLink:EmptyString)
 
 
 proc initPage*(name:string, title:string, basedir:string):Page =
