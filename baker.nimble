@@ -1,6 +1,6 @@
 # Package
 
-version       = "2.0.0"
+version       = "2.0.1"
 author        = "Jason R Briggs"
 description   = "Static website generation"
 license       = "Apache-2.0"
