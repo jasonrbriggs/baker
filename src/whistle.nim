@@ -7,44 +7,6 @@ import utils
 const
     HTACCESS_SHORTLINK_END_COMMENT = "# end of rewrite rules for short links"
 
-#[ 
-proc compressUrl*(url:string):string =
-    var u = parseUri(url)
-    var client = newHttpClient()
-    var dirpath = substr(u.path, 0, rfind(u.path, "/"))
-    var filename = substr(u.path, rfind(u.path, "/") + 1)
-    var date = dateasnum(dirpath)
-    if date == 0:
-        raise newException(ValueError, "No date pattern found in " & dirpath)
-
-    let firstchar = substr(u.path, 1, 1)
-    let ft = ftype(filename)
-
-    if ft == "":
-        raise newException(ValueError, "Unsupported file type " & filename)
-
-    var html = client.getContent(u.scheme & "://" & u.hostname & dirpath & "?C=M;O=A")
-    var doc = parseHtml(html)
-    var idx = 1
-    var actualidx = -1
-    for tr in doc.findAll("tr"):
-        var anchors = tr.findAll("a")
-        for anchor in anchors:
-            if anchor.attrs != nil and hasKey(anchor.attrs, "href"):
-                var href = anchor.attrs["href"]
-                if href == filename:
-                    actualidx = idx
-                    break
-                if ftype(href) == ft:
-                    idx += 1
-
-    if actualidx < 0:
-        raise newException(ValueError, "Unable to find match for " & filename & " in " & dirpath)
-
-    let sxg = numtosxg(((date - 19900101) * 1000) + actualidx)
-
-    return u.scheme & "://" & u.hostname & "/u/" & firstchar & ft & sxg
- ]#
 
 proc ftype(fname:string):string =
     var (_, _, e) = splitFile(fname)
@@ -62,6 +24,9 @@ proc addShortenedUrl*(rootdir:string, page:var Page) =
     let path = page.outputName
     var dirpath = substr(path, 0, rfind(path, "/"))
     var filename = substr(path, rfind(path, "/") + 1)
+
+    if dirpath == EmptyString:
+        return
 
     var date = dateasnum(dirpath)
     if date == 0:

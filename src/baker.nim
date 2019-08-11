@@ -25,6 +25,7 @@ Usage:
   baker indexes [--posts=<num>] <directory>
   baker dump <filename>
   baker init [<dir>]
+  baker jsonfeed <directory>
   baker micro
   baker rss <directory>
   baker sitemap
@@ -104,6 +105,10 @@ when isMainModule:
     elif args["rss"]:
         let dir = $args["<directory>"]
         generateFeed(dir)
+
+    elif args["jsonfeed"]:
+        let dir = $args["<directory>"]
+        generateJsonFeed(dir)
 
     elif args["blog"]:
         var titleWords:seq[string] = @[]

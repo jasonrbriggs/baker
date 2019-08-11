@@ -213,6 +213,8 @@ proc sxgtonum*(s:string):int =
 
 proc dateasnum*(url:string):int =
     var (first, last) = findBounds(url, urlDatePattern)
+    if first < 0:
+        return 0
     var date = substr(url, first, last)
     date = replace(date, "/", "")
     return parseInt(date)

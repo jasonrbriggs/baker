@@ -1,4 +1,5 @@
 import algorithm
+import json
 import lists
 import math
 import os
@@ -386,7 +387,7 @@ proc compressResourceFiles*(force:bool) =
     echo "complete"
 
 
-proc generateFeed*(directory:string) =
+proc loadFeedFiles(directory:string):(Page, seq[string]) =
     var files: seq[string] = @[]
     let cd = getCurrentDir()
     let cdi = len(cd)+1
@@ -396,6 +397,12 @@ proc generateFeed*(directory:string) =
     sort(files, system.cmp, SortOrder.Descending)
 
     let rootpage = loadPage(".", joinPath(directory, "index-page.text"))
+
+    return (rootpage, files)
+
+
+proc generateFeed*(directory:string) =
+    var (rootpage, files) = loadFeedFiles(directory)
     let url = rootpage.headers["url"]
 
     let tmps = loadTemplates(rootpage)
@@ -428,6 +435,45 @@ proc generateFeed*(directory:string) =
         inc(x)
 
     writePage(joinPath(directory, "feed.xml"), tmp)
+
+
+proc generateJsonFeed*(directory:string) =
+    var (rootpage, files) = loadFeedFiles(directory)
+
+    let url = rootpage.headers["url"]
+
+    let filename = joinPath(directory, "feed.json")
+
+    var jsonfeed = %*{
+        "version": "https://jsonfeed.org/version/1",
+        "title": rootpage.headers["title"],
+        "home_page_url": url,
+        "feed_url": joinUrlPaths(url, directory, "feed.json"),
+        "items": nil
+    }
+
+    var items = newJArray()
+
+    for file in files:
+        let page = loadPage(".", file)
+
+        let htmlUrl = joinUrlPaths(url, replace(file, ".text", ".html"))
+        let dt = parseDateTime(page.headers["posted-time"])
+        let fdt = formatDateTimeRss(dt)
+
+        let item = %*{
+             "id": htmlUrl,
+            "title": page.headers["title"],
+            "url": htmlUrl,
+            "content_text": page.content,
+            "content_html": page.htmlContent
+        }
+        add(items, item)
+    jsonfeed{"items"} = items
+
+    var pout = open(filename, fmWrite)
+    write(pout, pretty(jsonfeed))
+    close(pout)
 
 
 proc generateSitemap*() =
