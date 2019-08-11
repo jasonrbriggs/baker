@@ -27,6 +27,8 @@ type
         htmlContent*: string
         shortLink*:string
 
+let mentionRe = re"<a\s*[^>]*>@[^@]+@[^<]+</a>"
+
 
 proc hasValidHeaders(s:string):bool =
     if strip(s) != "":
@@ -90,8 +92,14 @@ proc loadPage*(basedir:string, name:string):Page =
         for t in ts:
             tags.add(strip(t))
 
+    var html = markdown(c)
+    var mentionMatches = findAll(html, mentionRe)
+    for match in mentionMatches:
+        if find(match, "class=") >= 0:
+            continue
+        html = replace(html, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
     return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
-        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:markdown(c), shortLink:EmptyString)
+        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
 
 
 proc initPage*(name:string, title:string, basedir:string):Page =
