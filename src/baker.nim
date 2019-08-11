@@ -76,14 +76,13 @@ when isMainModule:
         if args["<dir>"]:
             dir = $args["<dir>"]
 
-        let dotbaker = joinPath(dir, ".baker")
-        if fileExists(dotbaker):
+        let makefile = joinPath(dir, "Makefile")
+        if fileExists(makefile):
             echo "Already initialised"
             quit(1)
         else:
-            echo "inited"
-            var fs = newFileStream(dotbaker, fmWrite)
-            fs.writeLine("")
+            var fs = newFileStream(makefile, fmWrite)
+            fs.write(MAKEFILE)
             fs.close()
 
     elif args["test"]:
