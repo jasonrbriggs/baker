@@ -19,6 +19,8 @@ const
     DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
     RSS_PUBDATE_FORMAT*:string = "ddd, dd MMM yyyy HH:mm:ss zzz"
     ALL_CHARACTERS* = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz"
+    MAKEFILE* = staticRead("resources/Makefile")
+
 
 var numbers = initTable[char, int]()
 var i = 0
@@ -75,10 +77,10 @@ proc findFileUp*(dir:string, name:string): string =
 
 
 proc getRootDir*(dir:string): string =
-    let dotbaker = findFileUp(dir, ".baker")
-    if dotbaker == EmptyString:
+    let makefile = findFileUp(dir, "Makefile")
+    if makefile == EmptyString:
         raise newException(OSError, "Unable to find root dir for site")
-    return parentDir(dotbaker)
+    return parentDir(makefile)
 
 
 iterator findFilesStartingWith*(dir:string, name:string): string =
