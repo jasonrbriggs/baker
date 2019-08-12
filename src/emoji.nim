@@ -6,8 +6,6 @@ import strutils
 Emoji table sourced from https://pypi.org/project/emoji/ (with thanks).
 ]#
 
-let EMOJI_RE = re.re(":[^:]+:", {re.reMultiLine, reDotAll})
-
 let EMOJI_TABLE = {
     ":1st_place_medal:": "&#129351;",
     ":2nd_place_medal:": "&#129352;",
@@ -2633,10 +2631,18 @@ let EMOJI_TABLE = {
     ":zzz:": "&#128164;",
     ":Åland_Islands:": "&#127462;&#127485;"}.newStringTable()
 
-proc replaceEmoji*(s:string):string =
-    let matches = findAll(s, EMOJI_RE)
+
+let EMOJI_RE = re.re(":[^: ]+:", {re.reMultiLine, reDotAll})
+
+
+proc replaceEmojiUsingRegex(s:string, r:Regex):string =
+    let matches = findAll(s, r)
     var rtn = s
     for match in matches:
         if hasKey(EMOJI_TABLE, match):
             rtn = replace(rtn, match, EMOJI_TABLE[match])
     return rtn
+
+
+proc replaceEmoji*(s:string):string =
+    return replaceEmojiUsingRegex(s, EMOJI_RE)

@@ -28,6 +28,8 @@ type
         shortLink*:string
 
 let mentionRe = re"<a\s*[^>]*>@[^@]+@[^<]+</a>"
+let likeRe = re"http[^\s]+\s+👍"
+let urlRe = re"http[s]*:[^\s]+"
 
 
 proc hasValidHeaders(s:string):bool =
@@ -52,6 +54,28 @@ proc getHeader*(page:Page, name:string, default:string=""):string =
     if page.headers == nil or not hasKey(page.headers, name):
         return default
     return page.headers[name]
+
+
+proc replaceLikes(html:string):string =
+    var rtn = html
+    var matches = findAll(html, likeRe)
+    for match in matches:
+        let urls = findAll(match, urlRe)
+        var shorturl = urls[0]
+        shorturl = replace(shorturl, "https://", "")
+        shorturl = replace(shorturl, "http://", "")
+        rtn = replace(rtn, match, "<a class=\"u-like-of\" href=\"" & urls[0] & "\">" & shorturl & "</a> 👍")
+    return rtn
+
+
+proc replaceMentions(html:string):string =
+    var rtn = html
+    var matches = findAll(html, mentionRe)
+    for match in matches:
+        if find(match, "class=") >= 0:
+            continue
+        rtn = replace(rtn, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
+    return rtn
 
 
 proc loadPage*(basedir:string, name:string):Page =
@@ -93,11 +117,8 @@ proc loadPage*(basedir:string, name:string):Page =
             tags.add(strip(t))
 
     var html = markdown(c)
-    var mentionMatches = findAll(html, mentionRe)
-    for match in mentionMatches:
-        if find(match, "class=") >= 0:
-            continue
-        html = replace(html, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
+    html = replaceLikes(html)
+    html = replaceMentions(html)
     return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
         bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
 
