@@ -1,3 +1,4 @@
+import math
 import os
 import re
 import strutils
@@ -5,6 +6,9 @@ import times
 
 import generator
 import utils
+
+const
+    MAX_MICROBLOG_LENGTH:int=500
 
 let AT_LINK_RE = re.re("\\@[^@]+\\@[^\\s]+")
 
@@ -36,6 +40,32 @@ proc microBlog*() =
     if strip(input) == "":
         echo "Nothing to post"
         return
+
+    let inputlen = len(input)
+    if inputlen > MAX_MICROBLOG_LENGTH:
+        echo "Micro entry is > " & MAX_MICROBLOG_LENGTH.`$` & " characters, consider reposting as:"
+        echo ""
+        let postsize = MAX_MICROBLOG_LENGTH-10
+        let posts = int(ceil(inputlen / postsize))
+        var startpos = 0
+        var endpos = 0
+        for x in 1..posts:
+            echo "Post #" & x.`$`
+            echo ""
+            endpos = min(x * postsize, inputlen - 1)
+            if x < posts:
+                let wspos = rfind(input, Whitespace, endpos)
+                if endpos - wspos < 30:
+                    endpos = wspos
+            let post = strip(input[startpos..endpos])
+            startpos = endpos
+            if x == posts:
+                echo post & " (" & x.`$` & "/" & posts.`$` & ")"
+            else:
+                echo post & "... (" & x.`$` & "/" & posts.`$` & ")"
+            echo ""
+        return
+
 
     let at_matches = findAll(input, AT_LINK_RE)
 
