@@ -11,6 +11,7 @@ import os
 
 
 const
+    BakerVersion* {.strdefine.}: string = "0.0.1"
     Capitals:string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     EmptyString*:string = ""
     ForwardSlash*:string = "/"
