@@ -3,7 +3,6 @@ import os
 import docopt
 
 import blog
-import config
 import emoji
 import generator
 import pages
@@ -16,7 +15,7 @@ import utils
 import zip/gzipfiles
 
 let doc = """
-SiteBaker. Command line static website generator.
+Baker. Command line static website generator.
 
 Usage:
   baker blog <title>...
@@ -50,7 +49,7 @@ Available commands:
 """
 
 when isMainModule:
-    let args = docopt(doc, version = "SiteBaker " & BakerVersion)
+    let args = docopt(doc, version = "Baker " & BakerVersion)
 
     if args["generate"]:
         if args["--file"]:
