@@ -13,7 +13,6 @@ import zip/gzipfiles
 
 import proton
 
-import config
 import emoji
 import pages
 import utils
