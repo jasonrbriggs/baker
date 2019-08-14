@@ -1,7 +1,7 @@
 Version 2.0.2 -
 
 * Fix version of proton (should be >= 0.2.3)
-* add Makefile for building, fix reported version number when running cli
+* Add Makefile for building, fix reported version number when running cli
 
 
 Version 2.0.1 - Aug 2019
