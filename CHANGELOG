@@ -1,6 +1,16 @@
+Version 2.0.2 -
+
+* Fix version of proton (should be >= 0.2.3)
+* add Makefile for building, fix reported version number when running cli
+
+
 Version 2.0.1 - Aug 2019
 
 * Add image shadow functionality
+* Convert "<url> :thumbs_up:" into <a class="u-like-of"> microformat
+* Propose splitting long microblog messages
+* Provide basic Makefile
+* Change rootdir detection to look for Makefile instead of .baker file
 
 
 Version 2.0.0 - July 2019
