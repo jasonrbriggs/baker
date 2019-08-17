@@ -60,6 +60,8 @@ proc replaceLikes(html:string):string =
     var rtn = html
     var matches = findAll(html, likeRe)
     for match in matches:
+        if find(match, "</a>") >= 0:
+            continue
         let urls = findAll(match, urlRe)
         var shorturl = urls[0]
         shorturl = replace(shorturl, "https://", "")
