@@ -80,8 +80,8 @@ proc replaceMentions(html:string):string =
     return rtn
 
 
-proc loadPage*(basedir:string, name:string):Page =
-    let s = readFile(name)
+proc readPage(path:string):(StringTableRef, string) =
+    let s = readFile(path)
 
     var ss = nre.split(s, nre.re"\n\n|\r\n\r\n", maxSplit=2)
 
@@ -94,6 +94,27 @@ proc loadPage*(basedir:string, name:string):Page =
     else:
         hdrs = parseHeaders(ss[0])
         c = ss[1]
+    return (hdrs, c)
+
+
+proc mergeHeaders(h1:var StringTableRef, h2:StringTableRef) =
+    for key,val in pairs(h2):
+        if not hasKey(h1, key) and key != "banner-image":
+            h1[key] = val
+
+
+proc loadPage*(basedir:string, name:string):Page =
+    var roothdrs:StringTableRef = nil
+    var rootc:string = EmptyString
+    let indextext = joinPath(basedir, "index.text") 
+    if fileExists(indextext):
+        (roothdrs, rootc) = readPage(indextext)
+    else:
+        (roothdrs, rootc) = readPage(joinPath(basedir, "index-page.text"))
+
+    var (hdrs, c) = readPage(name)
+
+    mergeHeaders(hdrs, roothdrs)
 
     c = replaceEmoji(c)
 

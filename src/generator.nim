@@ -38,8 +38,10 @@ proc setPostedTime(tmp:Template, page:Page) =
         let dateonly = dt.format("dd MMM, yyyy")
         let timeonly = dt.format("hh:mm:ss")
         setvalue(tmp, "post-date-time", page.headers["posted-time"])
+        setvalue(tmp, "micro-rel-link", page.headers["posted-time"])
         setvalue(tmp, "micro-link", page.headers["posted-time"])
         setattribute(tmp, "post-date-time", "datetime", page.headers["posted-time"])
+        setattribute(tmp, "micro-rel-link", "datetime", page.headers["posted-time"])
         setattribute(tmp, "micro-link", "datetime", page.headers["posted-time"])
         setvalue(tmp, "post-date", dateonly)
         setvalue(tmp, "post-time", timeonly)
@@ -83,6 +85,7 @@ proc setTagLinks(tmp:Template, page:Page) =
             setattribute(tmp, "taglink", "href", "/tags/" & tags[i] & ".html", indexof(i))
     else:
         hide(tmp, "taglinks")
+        hide(tmp, "taglinks-image")
 
 
 proc addImageShadowStyle(tmp:Template, page:Page) =
@@ -107,12 +110,14 @@ filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Colo
 proc generateContent(page:var Page, tmps:Table[string,Template]):Template =
     let content_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & "-content.html"), true, tmps)
     setValueFromHeader(content_template, page, "title", "title")
+    setValueFromHeader(content_template, page, "sub-title", "sub-title")
     setvalue(content_template, "content", page.htmlContent)
     setPostedTime(content_template, page)
     setTagLinks(content_template, page)
     addImageShadowStyle(content_template, page)
     setattribute(content_template, "permalink-url", "href", ForwardSlash & page.outputName)
-    setattribute(content_template, "micro-link", "href", ForwardSlash & page.outputName)
+    setattribute(content_template, "micro-rel-link", "href", ForwardSlash & page.outputName)
+    setattribute(content_template, "micro-link", "href", joinUrlPaths(page.headers["url"], page.outputName))
 
     let rootdir = getRootDir(page.dirname)    
     addShortenedUrl(rootdir, page)
@@ -125,7 +130,10 @@ proc generateContent(page:var Page, tmps:Table[string,Template]):Template =
 proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
     # head setup
     let head_template = gettemplate(joinPath(template_dir_mappings[page.dirname], "head.html"), true, tmps)
+    setValueFromHeader(tmp, page, "title", "title")
+    setValueFromHeader(tmp, page, "sub-title", "sub-title")
     setValueFromHeader(head_template, page, "title", "title")
+    setValueFromHeader(head_template, page, "sub-title", "sub-title")
     setattribute(head_template, "generator", "content", "SiteBaker " & BakerVersion)
     setTagLinks(head_template, page)
     setPostedTime(head_template, page)
