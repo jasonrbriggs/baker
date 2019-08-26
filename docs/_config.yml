@@ -16,3 +16,4 @@ github_username:  jasonrbriggs
 
 # Build settings
 markdown: kramdown
+theme: jekyll-theme-minimal
