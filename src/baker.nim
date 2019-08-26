@@ -18,7 +18,7 @@ let doc = """
 Baker. Command line static website generator.
 
 Usage:
-  baker blog <title>...
+  baker blog [--tags=<tags>] <title>...
   baker compress [--force]
   baker generate [--file <filename>] [--force]
   baker indexes [--posts=<num>] <directory>
@@ -34,16 +34,21 @@ Usage:
 Options:
   -h --help       Show this screen.
   --file          Generate a specific file.
-  --force         Force re-generation, not just new files
-  --version       Show version
-  --posts=<posts> Posts per index page [default: 10]
+  --force         Force re-generation, not just new files.
+  --tags          Comma-separate list of tags, used for blog entries.
+  --version       Show the version.
+  --posts=<posts> Posts per index page [default: 10].
 
 Available commands:
+  blog            Generate a blog entry with the given title (and optionally tags).
   compress        Compress resource files (css, jpg).
   generate        Generate/render a file, or if no arguments given, all files with recent changes.
   indexes         Create the index pages for posts in a given directory.
   dump
   init            Setup a directory to use with baker.
+  jsonfeed        Generate a json feed file for the given directory.
+  micro           Generate a microblog entry (reads from standard-input, two newlines finishes entry).
+  rss             Generate an RSS feed file for the given directory.
   sitemap         Generate the sitemap.xml file in the root directory.
   tags            Generate the tag cloud directory.
 """
