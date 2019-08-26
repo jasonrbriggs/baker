@@ -2,6 +2,9 @@ Version 2.0.2 -
 
 * Fix version of proton (should be >= 0.2.3)
 * Add Makefile for building, fix reported version number when running cli
+* change micro-link to micro-rel-link for relative (in-site permalinks) - micro-link becomes absolute
+* add sub-title support back
+* bug fix for link modification 
 
 
 Version 2.0.1 - Aug 2019
