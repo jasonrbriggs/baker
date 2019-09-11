@@ -3,6 +3,7 @@ import os
 import docopt
 
 import blog
+import db
 import emoji
 import generator
 import pages
@@ -18,10 +19,11 @@ let doc = """
 Baker. Command line static website generator.
 
 Usage:
-  baker blog [--tags=<tags>] <title>...
+  baker blog [--taglist <tags>] <title>...
   baker compress [--force]
+  baker federate <targeturl> [--days <days>]
   baker generate [--file <filename>] [--force]
-  baker indexes [--posts=<num>] <directory>
+  baker indexes [--posts <num>] <directory>
   baker dump <filename>
   baker init [<dir>]
   baker jsonfeed <directory>
@@ -33,6 +35,7 @@ Usage:
 
 Options:
   -h --help       Show this screen.
+  --days          Number of days to federate (new posts only) [default: 1].
   --file          Generate a specific file.
   --force         Force re-generation, not just new files.
   --tags          Comma-separate list of tags, used for blog entries.
@@ -41,6 +44,7 @@ Options:
 
 Available commands:
   blog            Generate a blog entry with the given title (and optionally tags).
+  federate        Federate new posts (within a number of days) to the given target url using webmention.
   compress        Compress resource files (css, jpg).
   generate        Generate/render a file, or if no arguments given, all files with recent changes.
   indexes         Create the index pages for posts in a given directory.
@@ -89,13 +93,6 @@ when isMainModule:
             fs.write(MAKEFILE)
             fs.close()
 
-    elif args["test"]:
-        let zone = tz"Europe/London"
-        let dt = parse("2018-09-29T17:53:31+01:00", "yyyy-MM-dd\'T\'HH:mm:sszzz", zone)
-        let ds = dt.format("yyyy-MM-dd\'T\'HH:mm:sszzz")
-        let pos = ds.rfind(":")-1
-        echo ds[0..pos] & ds[pos+2..len(ds)-1]
-
     elif args["micro"]:
         microBlog()
 
@@ -117,7 +114,19 @@ when isMainModule:
         var titleWords:seq[string] = @[]
         for word in @(args["<title>"]):
             titleWords.add(word)
-        blog(join(titleWords, " "))
+        let tags = $args["<tags>"]
+        blog(join(titleWords, " "), tags)
 
     elif args["sitemap"]:
         generateSitemap()
+
+    elif args["federate"]:
+        var days = 1
+        if args["--days"]:
+            days = parseInt($args["<days>"])
+        federatePages(".", $args["<targeturl>"], days)
+
+    elif args["test"]:
+        let pg = loadPage(".", "journal/2019/09/07/idle3-on-ubuntu.text")
+
+        addPage(".", pg)
