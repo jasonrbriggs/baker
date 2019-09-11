@@ -1,3 +1,4 @@
+import httpclient
 import strformat
 import nre
 import os
@@ -7,7 +8,9 @@ import times
 
 import emoji
 import markdown
+import ndb/sqlite
 
+import db
 import utils
 
 
@@ -66,7 +69,11 @@ proc replaceLikes(html:string):string =
         var shorturl = urls[0]
         shorturl = replace(shorturl, "https://", "")
         shorturl = replace(shorturl, "http://", "")
-        rtn = replace(rtn, match, "<a class=\"u-like-of\" href=\"" & urls[0] & "\">" & shorturl & "</a> 👍")
+        let wmurl = getWebmentionUrl(urls[0])
+        var class = "u-like-of"
+        if wmurl == EmptyString:
+            class = ""
+        rtn = replace(rtn, match, "<a " & class & "href=\"" & urls[0] & "\">" & shorturl & "</a> 👍")
     return rtn
 
 
@@ -99,7 +106,7 @@ proc readPage(path:string):(StringTableRef, string) =
 
 proc mergeHeaders(h1:var StringTableRef, h2:StringTableRef) =
     for key,val in pairs(h2):
-        if not hasKey(h1, key) and key != "banner-image":
+        if not hasKey(h1, key) and key != "banner-image" and key != "type":
             h1[key] = val
 
 
@@ -131,7 +138,7 @@ proc loadPage*(basedir:string, name:string):Page =
         if not startsWith(pb, ForwardSlash):
             pb = ForwardSlash & pb
 
-    let outputName = replace(name, ".text", ".html")
+    let outputName = replace(name, DOT_TEXT_EXT, DOT_HTML_EXT)
 
     var tags: seq[string] = @[]
     if hasKey(hdrs, "tags"):
@@ -139,11 +146,15 @@ proc loadPage*(basedir:string, name:string):Page =
         for t in ts:
             tags.add(strip(t))
 
+    var pt = EmptyString
+    if hasKey(hdrs, "type"):
+        pt = hdrs["type"]
+
     var html = markdown(c)
     html = replaceLikes(html)
     html = replaceMentions(html)
     return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
-        bannerImage:EmptyString, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
+        bannerImage:EmptyString, pageType:pt, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
 
 
 proc initPage*(name:string, title:string, basedir:string):Page =
@@ -168,3 +179,81 @@ printed base: {page.printedBase}
 
 {page.content}
 """
+
+
+proc loadRootPage*(rootdir:string):Page = 
+    var indexpage = "index-page.text"
+    if not fileExists(indexpage):
+        indexpage = "index.text"
+
+    return loadPage(rootdir, indexpage)
+
+
+proc addPage*(rootdir:string, page:Page) =
+    let db = openDatabase(rootdir)
+    let val = db.getValue(string, sql"SELECT url FROM pages WHERE url=?", page.outputName)
+    if isNone(val):
+        let postedtime = page.headers["posted-time"]
+        let dt = formatDateTimeNoTz(parseDateTime(postedtime))
+        db.exec(sql"insert into pages (url, shorturl, created_date) values (?, ?, ?)", page.outputName, page.shortLink, dt)
+
+    db.close()
+
+
+proc federatePages*(rootdir:string, target:string, offset_days:int) =
+    var wmurl = getWebmentionUrl(target)
+    if wmurl == EmptyString:
+        sleep(1000)
+        # try again, seem to get an occasional failure
+        wmurl = getWebmentionUrl(target)
+    
+    if wmurl == EmptyString:
+        echo "No webmention link found for: " & target
+        quit(1)
+
+    let rootpage = loadRootPage(rootdir)
+    let url = rootpage.headers["url"]
+
+    let offset_date = formatDateZeroTime(now() - initDuration(days=offset_days))
+    
+    var count = 0
+    var client = newHttpClient()
+    let db = openDatabase(rootdir)
+    try:
+        for r in db.rows(sql"SELECT p.url FROM pages p where created_date > ? and not exists (select 1 from federated f where f.url = p.url and f.federated_to = ?)",
+                offset_date, target):
+            let page = replace(r[0].s, DOT_HTML_EXT, DOT_TEXT_EXT)
+            let pg = loadPage(rootdir, page)
+            if pg.pageType == "page":
+                continue
+
+            let pageUrl = r[0].s
+
+            let fullUrl = joinUrlPaths(url, pageUrl)
+
+            var resp = client.request(fullUrl, httpMethod = HttpHead)
+            let pageStatus = parseHttpStatus(resp.status)
+            if pageStatus == 404:
+                echo " - can't federate " & pageUrl & " (page not found - did you sync to your site?)"
+                continue
+
+            let body = "source=" & joinUrlPaths(url, r[0].s) & "&target=" & target
+            resp = client.request(url, httpMethod = HttpPost, body = $body)
+            
+            let fedStatus = parseHttpStatus(resp.status)
+            if fedStatus >= 400:
+                echo "An error occurred federating " & pageUrl & ", status " & resp.status
+                echo resp.headers.`$`
+                echo resp.body
+                quit(1)
+
+            echo " - federated " & fullUrl & "(status: " & resp.status & ")"
+            let fedDate = formatDateTimeNoTz(now())
+            db.exec(sql"insert into federated values (?, ?, ?)", pageUrl, target, fedDate)
+            inc(count)
+
+        if count == 0:
+            echo "No pages found to federate."
+    
+    finally:
+        db.close()
