@@ -11,9 +11,9 @@ const
 proc ftype(fname:string):string =
     var (_, _, e) = splitFile(fname)
     var ext = toLowerAscii(e)
-    if ext == ".html" or ext == ".htm":
+    if ext == DOT_HTML_EXT or ext == ".htm":
         return "b"
-    elif ext == ".text" or ext == ".txt":
+    elif ext == DOT_TEXT_EXT or ext == ".txt":
         return "t"
     elif ext == ".png" or ext == ".gif" or ext == ".jpg" or ext == ".jpeg":
         return "p"
