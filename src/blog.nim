@@ -12,18 +12,18 @@ const
 
 let AT_LINK_RE = re.re("\\@[^@]+\\@[^\\s]+")
 
-proc blog*(title:string) =
-    let n = now()
+proc blog*(title:string, tags:string="") =
+    let n = getCurrentDateTime()
     let dir = joinUrlPaths("journal", n.format("yyyy/MM/dd"))
     let name = toLowerAscii(multiReplace(title, ("\"", ""), ("'", ""), (":", ""), (" ", "-"), ("&", "and")))
-    let filepath = joinUrlPaths(dir, name) & ".text"
+    let filepath = joinUrlPaths(dir, name) & DOT_TEXT_EXT
 
     createDir(dir)
     var pout = open(filepath, fmWrite)
     write(pout, "title: " & title & "\n")
     write(pout, "posted-time: " & formatDateTime(n) & "\n")
-    write(pout, "tags: \n")
-    write(pout, "\n\n")
+    write(pout, "tags: " & tags & "\n")
+    write(pout, "\n")
     close(pout)
 
 
@@ -69,9 +69,9 @@ proc microBlog*() =
 
     let at_matches = findAll(input, AT_LINK_RE)
 
-    let n = now()
+    let n = getCurrentDateTime()
     let dir = joinUrlPaths("micro", n.format("yyyy/MM/dd"))
-    let name = n.format("HHmmss") & ".text"
+    let name = n.format("HHmmss") & DOT_TEXT_EXT
 
     let filepath = joinUrlPaths(dir, name)
 
