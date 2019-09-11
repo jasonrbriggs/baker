@@ -13,6 +13,7 @@ import zip/gzipfiles
 
 import proton
 
+import db
 import emoji
 import pages
 import utils
@@ -82,7 +83,7 @@ proc setTagLinks(tmp:Template, page:Page) =
         repeat(tmp, "taglinks", len(tags))
         for i in 0..len(tags)-1:
             setvalue(tmp, "taglink", tags[i], indexof(i))
-            setattribute(tmp, "taglink", "href", "/tags/" & tags[i] & ".html", indexof(i))
+            setattribute(tmp, "taglink", "href", "/tags/" & tags[i] & DOT_HTML_EXT, indexof(i))
     else:
         hide(tmp, "taglinks")
         hide(tmp, "taglinks-image")
@@ -124,6 +125,8 @@ proc generateContent(page:var Page, tmps:Table[string,Template]):Template =
     if page.shortLink != EmptyString:
         setattribute(content_template, "shortlink-url", "href", ForwardSlash & page.shortLink)
 
+    addPage(rootdir, page)
+
     return content_template
 
 
@@ -157,7 +160,7 @@ proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
 
 
 proc generatePage(page:Page, tmps:Table[string,Template]):Template =
-    let page_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & ".html"), true, tmps)
+    let page_template = gettemplate(joinPath(template_dir_mappings[page.dirname], page.pageType & DOT_HTML_EXT), true, tmps)
     generatePageCommon(page, tmps, page_template)
     return page_template
 
@@ -183,9 +186,9 @@ proc writePage(name:string, tmp:Template) =
 proc getPrevNextPage(name:string, page_num:int, total:int):(string, string) =
     let prev_num = page_num - 1
     let prev_page = if prev_num > 0: "-" & prev_num.`$` else: ""
-    let prev = replace(name, ".html", prev_page & ".html")
+    let prev = replace(name, DOT_HTML_EXT, prev_page & DOT_HTML_EXT)
     let next_num = page_num + 1
-    let next = replace(name, ".html", "-" & next_num.`$` & ".html")
+    let next = replace(name, DOT_HTML_EXT, "-" & next_num.`$` & DOT_HTML_EXT)
     if page_num == 0:
         if next_num < total:
             return (EmptyString, next)
@@ -211,7 +214,7 @@ proc writeIndexPage(name:string, tmp:Template, page_num:int, total_pages:int) =
         hide(tmp, "pagelinksep")
 
     if page_num > 0:
-        writePage(replace(name, ".html", "-" & page_num.`$` & ".html"), tmp)
+        writePage(replace(name, DOT_HTML_EXT, "-" & page_num.`$` & DOT_HTML_EXT), tmp)
     else:
         writePage(name, tmp)
 
@@ -238,7 +241,7 @@ proc generate*(filename:string) =
     hide(page_template, "nextpage")
     hide(page_template, "pagelinksep")
 
-    var cout = open(replace(page.outputName, ".html", "-content.html"), fmWrite)
+    var cout = open(replace(page.outputName, DOT_HTML_EXT, "-content.html"), fmWrite)
     print(cout, content_template)
     close(cout)
 
@@ -257,7 +260,7 @@ proc generateAll*(force:bool) =
         if endsWith(p, "index-page.text"):
             continue
         if endsWith(p, "text"):
-            let html = replace(p, ".text", ".html")
+            let html = replace(p, DOT_TEXT_EXT, DOT_HTML_EXT)
             if force or not fileExists(html) or fileNewer(p, html):
                 generate(p)
 
@@ -341,7 +344,7 @@ proc generateTags*() =
     for x in 0..len(tagNames)-1:
         let tag = tagNames[x]
         setvalue(tmp, "tag", tag, indexOf(x))
-        setattribute(tmp, "tag", "href", "/tags/" & toLowerAscii(tag) & ".html", indexOf(x))
+        setattribute(tmp, "tag", "href", "/tags/" & toLowerAscii(tag) & DOT_HTML_EXT, indexOf(x))
         let count = len(tags[tag])
         if count >= 20:
             setattribute(tmp, "tag", "class", "tag20", indexOf(x))
@@ -361,7 +364,7 @@ proc generateTags*() =
         let pages: seq[string] = tags[tag]
         var actualPages: seq[string] = @[]
         for page in pages:
-            let p = replace(page, ".text", "-content.html")
+            let p = replace(page, DOT_TEXT_EXT, "-content.html")
             if fileExists(p):
                 actualPages.add(p)
         var tagPage = initPage(tag, tag, ".")
@@ -375,7 +378,7 @@ proc generateTags*() =
 
         pickBannerImage(tagPage)
         generatePageCommon(tagPage, tmps, tagTmp)
-        writePage("tags/" & ltag & ".html", tagTmp)
+        writePage("tags/" & ltag & DOT_HTML_EXT, tagTmp)
 
 
 proc compressResourceFiles*(force:bool) = 
@@ -400,7 +403,7 @@ proc loadFeedFiles(directory:string):(Page, seq[string]) =
     let cdi = len(cd)+1
     for path in walkDirRec(directory):
         if contains(path, "-content.html"):
-            add(files, replace(path, "-content.html", ".text"))
+            add(files, replace(path, "-content.html", DOT_TEXT_EXT))
     sort(files, system.cmp, SortOrder.Descending)
 
     let rootpage = loadPage(".", joinPath(directory, "index-page.text"))
@@ -425,7 +428,7 @@ proc generateFeed*(directory:string) =
     for file in files:
         let page = loadPage(".", file)
 
-        let htmlUrl = joinUrlPaths(url, replace(file, ".text", ".html"))
+        let htmlUrl = joinUrlPaths(url, replace(file, DOT_TEXT_EXT, DOT_HTML_EXT))
         let pos = indexOf(x)
         setvalue(tmp, "title", page.headers["title"], pos)
         setvalue(tmp, "link", htmlUrl, pos)
@@ -434,7 +437,7 @@ proc generateFeed*(directory:string) =
         let dt = parseDateTime(page.headers["posted-time"])
         let fdt = formatDateTimeRss(dt)
         setvalue(tmp, "pubdate", fdt, pos)
-        setvalue(tmp, "guid", replace(htmlUrl, ".html", ""), pos)
+        setvalue(tmp, "guid", replace(htmlUrl, DOT_HTML_EXT, EmptyString), pos)
 
         if x == 0:
             setvalue(tmp, "lastbuild", fdt)
@@ -464,7 +467,7 @@ proc generateJsonFeed*(directory:string) =
     for file in files:
         let page = loadPage(".", file)
 
-        let htmlUrl = joinUrlPaths(url, replace(file, ".text", ".html"))
+        let htmlUrl = joinUrlPaths(url, replace(file, DOT_TEXT_EXT, DOT_HTML_EXT))
         let dt = parseDateTime(page.headers["posted-time"])
         let fdt = formatDateTimeRss(dt)
 
@@ -489,15 +492,11 @@ proc generateSitemap*() =
     let cdi = len(cd)+1
     for path in walkDirRec(cd):
         if endsWith(path, "-content.html") and not contains(path, "templates/"):
-            let p = replace(path, "-content.html", ".html")
+            let p = replace(path, "-content.html", DOT_HTML_EXT)
             add(files, p[cdi..len(p)-1])
     sort(files, system.cmp, SortOrder.Descending)
 
-    var indexpage = "index-page.text"
-    if not fileExists(indexpage):
-        indexpage = "index.text"
-
-    let rootpage = loadPage(".", indexpage)
+    let rootpage = loadRootPage(".")
     let url = rootpage.headers["url"]
 
     let tmps = loadTemplates(rootpage)
@@ -508,7 +507,7 @@ proc generateSitemap*() =
     var x = 0
     for file in files:
         setvalue(tmp, "url", file, indexOf(x))
-        let mt = getLastModificationTime(replace(file, ".html", ".text"))
+        let mt = getLastModificationTime(replace(file, DOT_HTML_EXT, DOT_TEXT_EXT))
         setvalue(tmp, "lastmod", mt.format(DATE_FORMAT), indexOf(x))
         inc(x)
 
