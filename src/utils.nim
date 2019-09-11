@@ -1,3 +1,4 @@
+import httpclient
 import times
 import json
 import math
@@ -18,9 +19,13 @@ const
     NEWLINE*:string = "\n"
     DATE_FORMAT*:string = "yyyy-MM-dd"
     DATETIME_FORMAT*:string = "yyyy-MM-dd\'T\'HH:mm:sszzz"
+    DATETIME_FORMAT_ZERO_TIME:string = "yyyy-MM-dd\'T00:00:00\'"
     RSS_PUBDATE_FORMAT*:string = "ddd, dd MMM yyyy HH:mm:ss zzz"
+    DATETIME_FORMAT_NO_TZ = "yyyy-MM-dd\'T\'HH:mm:ss"
     ALL_CHARACTERS* = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz"
     MAKEFILE* = staticRead("resources/Makefile")
+    DOT_HTML_EXT* = ".html"
+    DOT_TEXT_EXT* = ".text"
 
 
 var numbers = initTable[char, int]()
@@ -35,6 +40,8 @@ numbers['O'] = 0 # typo capital O to 0
 
 let baseTimezone:TimeZone = tz"Europe/London"
 let urlDatePattern = re"[0-9]{4}/[0-9]{2}/[0-9]{2}"
+let wmRe = re"""<link.*rel="webmention[^>]+""""
+let hrefRe = re"""href="([^"]+)"""
 
 
 proc isEmpty*(s:string): bool =
@@ -182,6 +189,14 @@ proc formatDateTime*(dt:DateTime):string =
     return dt.format(DATETIME_FORMAT)
 
 
+proc formatDateTimeNoTz*(dt:DateTime):string =
+    return dt.format(DATETIME_FORMAT_NO_TZ)
+
+
+proc formatDateZeroTime*(dt:DateTime):string =
+    return dt.format(DATETIME_FORMAT_ZERO_TIME)
+
+
 proc shortHash*(s:string):float64 =
     var i = 0
     for c in s:
@@ -221,3 +236,33 @@ proc dateasnum*(url:string):int =
     var date = substr(url, first, last)
     date = replace(date, "/", "")
     return parseInt(date)
+
+
+proc getCurrentDateTime*():DateTime =
+    if existsEnv("BAKER_DATETIME_OVERRIDE"):
+        return parseDateTime(getEnv("BAKER_DATETIME_OVERRIDE"))
+    else:
+        return now()
+
+
+proc getWebmentionUrl*(url:string):string =
+    var client = newHttpClient()
+    var resp = client.request(url, httpMethod = HttpGet)
+    let c = body(resp)
+    let wm = findAll(c, wmRe)
+    if len(wm) == 0:
+        return EmptyString
+    else:
+        let href = findAll(wm[0], hrefRe)
+        let wmurl = replace(href[0], "href=\"", "")
+        if startsWith(wmurl, "/"):
+            return joinUrlPaths(url, wmurl)
+        else:
+            return wmurl
+
+
+proc parseHttpStatus*(status:string):int =
+    if isEmpty(status):
+        raise newException(ValueError, "Expected '<code> <text>' got '" & status & "'")
+    let s = split(status)
+    return parseInt(s[0])
