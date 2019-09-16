@@ -200,16 +200,23 @@ proc addPage*(rootdir:string, page:Page) =
     db.close()
 
 
-proc federatePages*(rootdir:string, target:string, offset_days:int) =
-    var wmurl = getWebmentionUrl(target)
+proc federatePages*(rootdir:string, federate_target_url:string, offset_days:int) =
+    echo "Federate new pages to " & federate_target_url
+    echo "  - looking for webmention link"
+    var wmurl = getWebmentionUrl(federate_target_url)
     if wmurl == EmptyString:
-        sleep(1000)
-        # try again, seem to get an occasional failure
-        wmurl = getWebmentionUrl(target)
+        for x in 0..5:
+            sleep(1000)
+            # try again, seem to get an occasional failure
+            wmurl = getWebmentionUrl(federate_target_url)
+            if wmurl != EmptyString:
+                break
     
     if wmurl == EmptyString:
-        echo "No webmention link found for: " & target
+        echo "  - error: no webmention link found for: " & federate_target_url
         quit(1)
+    else:
+        echo "  - found webmention url: " & wmurl
 
     let rootpage = loadRootPage(rootdir)
     let url = rootpage.headers["url"]
@@ -221,8 +228,11 @@ proc federatePages*(rootdir:string, target:string, offset_days:int) =
     let db = openDatabase(rootdir)
     try:
         for r in db.rows(sql"SELECT p.url FROM pages p where created_date > ? and not exists (select 1 from federated f where f.url = p.url and f.federated_to = ?)",
-                offset_date, target):
+                offset_date, federate_target_url):
             let page = replace(r[0].s, DOT_HTML_EXT, DOT_TEXT_EXT)
+            if not fileExists(page):
+                continue
+
             let pg = loadPage(rootdir, page)
             if pg.pageType == "page":
                 continue
@@ -234,26 +244,27 @@ proc federatePages*(rootdir:string, target:string, offset_days:int) =
             var resp = client.request(fullUrl, httpMethod = HttpHead)
             let pageStatus = parseHttpStatus(resp.status)
             if pageStatus == 404:
-                echo " - can't federate " & pageUrl & " (page not found - did you sync to your site?)"
+                echo "  - warning: can't federate " & pageUrl & " (page not found - did you sync to your site?)"
                 continue
 
-            let body = "source=" & joinUrlPaths(url, r[0].s) & "&target=" & target
-            resp = client.request(url, httpMethod = HttpPost, body = $body)
-            
+            echo "  - federating " & fullUrl
+            let body = "source=" & fullUrl & "&target=" & federate_target_url
+            resp = client.request(wmurl, httpMethod = HttpPost, body = $body)
+
             let fedStatus = parseHttpStatus(resp.status)
             if fedStatus >= 400:
-                echo "An error occurred federating " & pageUrl & ", status " & resp.status
+                echo "  - an error occurred federating " & pageUrl & ", status " & resp.status
                 echo resp.headers.`$`
                 echo resp.body
                 quit(1)
 
-            echo " - federated " & fullUrl & "(status: " & resp.status & ")"
+            echo "    * done (status: " & resp.status & ")"
             let fedDate = formatDateTimeNoTz(now())
-            db.exec(sql"insert into federated values (?, ?, ?)", pageUrl, target, fedDate)
+            db.exec(sql"insert into federated values (?, ?, ?)", pageUrl, federate_target_url, fedDate)
             inc(count)
 
         if count == 0:
-            echo "No pages found to federate."
+            echo "  - no pages found to federate"
     
     finally:
         db.close()
