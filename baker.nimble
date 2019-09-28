@@ -12,7 +12,7 @@ bin           = @["baker"]
 # Dependencies
 
 requires "nim >= 0.20.0"
-requires "proton >= 0.2.2"
+requires "proton >= 0.2.4"
 requires "https://github.com/docopt/docopt.nim#head"
 requires "markdown >= 0.2.0"
 requires "zip >= 0.2.1"
