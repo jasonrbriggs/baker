@@ -21,7 +21,7 @@ Baker. Command line static website generator.
 Usage:
   baker blog [--taglist <tags>] <title>...
   baker compress [--force]
-  baker federate <targeturl> [--days <days>]
+  baker federate <targeturl> <directory> [--days <days>]
   baker generate [--file <filename>] [--force]
   baker indexes [--posts <num>] <directory>
   baker dump <filename>
@@ -124,7 +124,8 @@ when isMainModule:
         var days = 1
         if args["--days"]:
             days = parseInt($args["<days>"])
-        federatePages(".", $args["<targeturl>"], days)
+        let dir = $args["<directory>"]
+        federatePages(".", $args["<targeturl>"], dir, days)
 
     elif args["test"]:
         let pg = loadPage(".", "journal/2019/09/07/idle3-on-ubuntu.text")

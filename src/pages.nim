@@ -200,7 +200,7 @@ proc addPage*(rootdir:string, page:Page) =
     db.close()
 
 
-proc federatePages*(rootdir:string, federate_target_url:string, offset_days:int) =
+proc federatePages*(rootdir:string, federate_target_url:string, dir:string, offset_days:int) =
     echo "Federate new pages to " & federate_target_url
     echo "  - looking for webmention link"
     var wmurl = getWebmentionUrl(federate_target_url)
@@ -226,9 +226,10 @@ proc federatePages*(rootdir:string, federate_target_url:string, offset_days:int)
     var count = 0
     var client = newHttpClient()
     let db = openDatabase(rootdir)
+    let wheredir = dir & "%"
     try:
-        for r in db.rows(sql"SELECT p.url FROM pages p where created_date > ? and not exists (select 1 from federated f where f.url = p.url and f.federated_to = ?)",
-                offset_date, federate_target_url):
+        for r in db.rows(sql"SELECT p.url FROM pages p where created_date > ? and url like ? and not exists (select 1 from federated f where f.url = p.url and f.federated_to = ?)",
+                offset_date, wheredir, federate_target_url):
             let page = replace(r[0].s, DOT_HTML_EXT, DOT_TEXT_EXT)
             if not fileExists(page):
                 continue
