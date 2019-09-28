@@ -57,7 +57,7 @@ proc addShortenedUrl*(rootdir:string, page:var Page) =
     if find(s, HTACCESS_SHORTLINK_END_COMMENT) < 0:
         return
     
-    if find(s, matchpattern) < 0: 
+    if find(s, page.outputName) < 0: 
         let replacement = rule & "\n\t" & HTACCESS_SHORTLINK_END_COMMENT
         let newhtaccess = replace(s, HTACCESS_SHORTLINK_END_COMMENT, replacement)
         var pout = open(htaccess, fmWrite)
