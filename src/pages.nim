@@ -192,7 +192,7 @@ proc loadRootPage*(rootdir:string):Page =
 proc addPage*(rootdir:string, page:Page) =
     let db = openDatabase(rootdir)
     let val = db.getValue(string, sql"SELECT url FROM pages WHERE url=?", page.outputName)
-    if isNone(val):
+    if isNone(val) and hasKey(page.headers, "posted-time"):
         let postedtime = page.headers["posted-time"]
         let dt = formatDateTimeNoTz(parseDateTime(postedtime))
         db.exec(sql"insert into pages (url, shorturl, created_date) values (?, ?, ?)", page.outputName, page.shortLink, dt)
