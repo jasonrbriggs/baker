@@ -6,6 +6,7 @@ import blog
 import db
 import emoji
 import generator
+import init
 import pages
 import streams
 import strutils
@@ -84,14 +85,15 @@ when isMainModule:
         if args["<dir>"]:
             dir = $args["<dir>"]
 
+        if not dirExists(dir):
+            createDir(dir)
+
         let makefile = joinPath(dir, "Makefile")
         if fileExists(makefile):
             echo "Already initialised"
             quit(1)
         else:
-            var fs = newFileStream(makefile, fmWrite)
-            fs.write(MAKEFILE)
-            fs.close()
+            initialise(dir)
 
     elif args["micro"]:
         microBlog()
