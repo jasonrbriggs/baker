@@ -1,6 +1,0 @@
-plugins: menu
-title: Example site
-template: page.html
-meta-description: Meta-description goes here.
-url: https://test.test
-
