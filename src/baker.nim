@@ -20,7 +20,7 @@ let doc = """
 Baker. Command line static website generator.
 
 Usage:
-  baker blog [--taglist <tags>] <title>...
+  baker blog <title> [--taglist <tags>]
   baker compress [--force]
   baker federate <targeturl> <directory> [--days <days>]
   baker generate [--file <filename>] [--force]
@@ -28,34 +28,35 @@ Usage:
   baker dump <filename>
   baker init [<dir>]
   baker jsonfeed <directory>
-  baker micro
+  baker micro [-]
   baker rss <directory>
   baker sitemap
   baker test
   baker tags
 
 Options:
-  -h --help       Show this screen.
-  --days          Number of days to federate (new posts only) [default: 1].
-  --file          Generate a specific file.
-  --force         Force re-generation, not just new files.
-  --tags          Comma-separate list of tags, used for blog entries.
-  --version       Show the version.
-  --posts=<posts> Posts per index page [default: 10].
+  -h --help         Show this screen.
+  --days            Number of days to federate (new posts only) [default: 1].
+  --file            Generate a specific file.
+  --force           Force re-generation, not just new files.
+  --tags            Comma-separate list of tags, used for blog entries.
+  --version         Show the version.
+  --posts=<posts>   Posts per index page [default: 10].
+  --taglist <tags>  Comma separated list of tags [default: ""]
 
 Available commands:
-  blog            Generate a blog entry with the given title (and optionally tags).
-  federate        Federate new posts (within a number of days) to the given target url using webmention.
-  compress        Compress resource files (css, jpg).
-  generate        Generate/render a file, or if no arguments given, all files with recent changes.
-  indexes         Create the index pages for posts in a given directory.
+  blog              Generate a blog entry with the given title (and optionally tags).
+  federate          Federate new posts (within a number of days) to the given target url using webmention.
+  compress          Compress resource files (css, jpg).
+  generate          Generate/render a file, or if no arguments given, all files with recent changes.
+  indexes           Create the index pages for posts in a given directory.
   dump
-  init            Setup a directory to use with baker.
-  jsonfeed        Generate a json feed file for the given directory.
-  micro           Generate a microblog entry (reads from standard-input, two newlines finishes entry).
-  rss             Generate an RSS feed file for the given directory.
-  sitemap         Generate the sitemap.xml file in the root directory.
-  tags            Generate the tag cloud directory.
+  init              Setup a directory to use with baker.
+  jsonfeed          Generate a json feed file for the given directory.
+  micro             Generate a microblog entry (reads from standard-input, two newlines finishes entry).
+  rss               Generate an RSS feed file for the given directory.
+  sitemap           Generate the sitemap.xml file in the root directory.
+  tags              Generate the tag cloud directory.
 """
 
 when isMainModule:
@@ -96,7 +97,10 @@ when isMainModule:
             initialise(dir)
 
     elif args["micro"]:
-        microBlog()
+        var contents = ""
+        if args["-"]:
+            contents = readAll(stdin)
+        microBlog(contents)
 
     elif args["tags"]:
         generateTags()
@@ -113,11 +117,10 @@ when isMainModule:
         generateJsonFeed(dir)
 
     elif args["blog"]:
-        var titleWords:seq[string] = @[]
-        for word in @(args["<title>"]):
-            titleWords.add(word)
-        let tags = $args["<tags>"]
-        blog(join(titleWords, " "), tags)
+        var tags = ""
+        if args["tags"]:
+            tags = $args["<tags>"]
+        blog($args["<title>"], tags)
 
     elif args["sitemap"]:
         generateSitemap()
@@ -129,7 +132,3 @@ when isMainModule:
         let dir = $args["<directory>"]
         federatePages(".", $args["<targeturl>"], dir, days)
 
-    elif args["test"]:
-        let pg = loadPage(".", "journal/2019/09/07/idle3-on-ubuntu.text")
-
-        addPage(".", pg)
