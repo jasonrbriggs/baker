@@ -1,0 +1,15 @@
+{
+  "version": "https://jsonfeed.org/version/1",
+  "title": "[Microblog title]",
+  "home_page_url": "http://example.org/micro",
+  "feed_url": "http://example.org/micro/micro/feed.json",
+  "items": [
+    {
+      "id": "http://example.org/micro/micro/2019/10/07/205712.html",
+      "title": "Microblog posted at 07 Oct 2019 20:57:12",
+      "url": "http://example.org/micro/micro/2019/10/07/205712.html",
+      "content_text": "This is a test micro post\n",
+      "content_html": "<p>This is a test micro post</p>\n"
+    }
+  ]
+}

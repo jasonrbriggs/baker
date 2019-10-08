@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>[Microblog title]</title>
+        <link>http://example.org/micro</link>
+        <description>[Microblog feed description]</description>
+        <lastBuildDate>Mon, 07 Oct 2019 20:57:12 +0100</lastBuildDate>
+        <generator>SiteBaker</generator>
+        <atom:link href="http://example.org/micro/micro/feed.xml" rel="self" type="application/rss+xml" />
+        <item>
+            <title>Microblog posted at 07 Oct 2019 20:57:12</title>
+            <link>http://example.org/micro/micro/2019/10/07/205712.html</link>
+            <description><![CDATA[<p>This is a test micro post</p>
+]]></description>
+            <pubDate>Mon, 07 Oct 2019 20:57:12 +0100</pubDate>
+            <guid>http://example.org/micro/micro/2019/10/07/205712</guid>
+        </item>
+    </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>[Blog title]</title>
+        <link>http://example.org/blog</link>
+        <description>[Blog description]</description>
+        <lastBuildDate>Mon, 07 Oct 2019 20:57:12 +0100</lastBuildDate>
+        <generator>SiteBaker</generator>
+        <atom:link href="http://example.org/blog/blog/feed.xml" rel="self" type="application/rss+xml" />
+        <item>
+            <title>This is a test post</title>
+            <link>http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html</link>
+            <description><![CDATA[<p>This is a test post</p>
+]]></description>
+            <pubDate>Mon, 07 Oct 2019 20:57:12 +0100</pubDate>
+            <guid>http://example.org/blog/blog/2019/10/07/this-is-a-test-post</guid>
+        </item>
+    </channel>
+</rss>
