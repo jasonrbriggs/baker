@@ -1,10 +1,12 @@
 import math
 import os
 import re
+import strtabs
 import strutils
 import times
 
 import generator
+import pages
 import utils
 
 const
@@ -13,8 +15,14 @@ const
 let AT_LINK_RE = re.re("\\@[^@]+\\@[^\\s]+")
 
 proc blog*(title:string, tags:string="") =
+    let pg = loadRootPage(".")
+
+    var blogdir = "blog"
+    if hasKey(pg.headers, "blog-dir"):
+        blogdir = pg.headers["blog-dir"]
+
     let n = getCurrentDateTime()
-    let dir = joinUrlPaths("journal", n.format("yyyy/MM/dd"))
+    let dir = joinUrlPaths(blogdir, n.format("yyyy/MM/dd"))
     let name = toLowerAscii(multiReplace(title, ("\"", ""), ("'", ""), (":", ""), (" ", "-"), ("&", "and")))
     let filepath = joinUrlPaths(dir, name) & DOT_TEXT_EXT
 
@@ -27,15 +35,16 @@ proc blog*(title:string, tags:string="") =
     close(pout)
 
 
-proc microBlog*() =
-    var input = ""
-    while true:
-        let line = readLine(stdin)
-        if line == EmptyString:
-            break
-        if input != "":
-            input = input & NEWLINE
-        input = input & line
+proc microBlog*(content:string) =
+    var input = content
+    if input == EmptyString:
+        while true:
+            let line = readLine(stdin)
+            if line == EmptyString:
+                break
+            if input != "":
+                input = input & NEWLINE
+            input = input & line
 
     if strip(input) == "":
         echo "Nothing to post"
@@ -65,7 +74,6 @@ proc microBlog*() =
                 echo post & "... (" & x.`$` & "/" & posts.`$` & ")"
             echo ""
         return
-
 
     let at_matches = findAll(input, AT_LINK_RE)
 
