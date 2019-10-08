@@ -27,19 +27,6 @@ const
     DOT_HTML_EXT* = ".html"
     DOT_TEXT_EXT* = ".text"
 
-    TEMPLATE_FOOT* = staticRead("resources/templates/foot.html")
-    TEMPLATE_HEAD* = staticRead("resources/templates/head.html")
-    TEMPLATE_HEADER* = staticRead("resources/templates/header.html")
-    TEMPLATE_MICROPAGE* = staticRead("resources/templates/micro-page.html")
-    TEMPLATE_MICROPOSTCONTENT* = staticRead("resources/templates/micro-post-content.html")
-    TEMPLATE_MICROPOST* = staticRead("resources/templates/micro-post.html")
-    TEMPLATE_PAGECONTENT* = staticRead("resources/templates/page-content.html")
-    TEMPLATE_PAGE* = staticRead("resources/templates/page.html")
-    TEMPLATE_POSTCONTENT* = staticRead("resources/templates/post-content.html")
-    TEMPLATE_POST* = staticRead("resources/templates/post.html")
-    TEMPLATE_TAG* = staticRead("resources/templates/tag.html")
-    TEMPLATE_TAGS* = staticRead("resources/templates/tags.html")
-
 
 var numbers = initTable[char, int]()
 var i = 0
@@ -220,8 +207,6 @@ proc shortHash*(s:string):float64 =
         i2 += (ord(c) - 48)
     return float64(i2) / 30.0
 
-#   RewriteRule ^u/jbMdB6g$ /journal/2018/05/09/a-question-about-tkinter-update.html [R=301,L]
-    # end of rewrite rules for short links
 
 proc numtosxg*(n:int64):string =
     var s = ""
