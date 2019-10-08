@@ -1,3 +1,9 @@
+Version 2.0.3 -
+
+* Fix init command 
+* Add read from stdin for micro blog command
+
+
 Version 2.0.2 - Sep 2019
 
 * Fix version of proton (should be >= 0.2.3)
