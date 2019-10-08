@@ -1,4 +1,4 @@
-Version 2.0.3 -
+Version 2.0.3 - Oct 2019
 
 * Fix init command 
 * Add read from stdin for micro blog command
