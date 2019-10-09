@@ -1,3 +1,28 @@
+.microblog {
+width:650px;
+margin-left:auto;
+margin-right:auto;
+margin-top:1.5em;
+line-height:25px;
+}
+
+.micro-content {
+margin-bottom:2em;
+}
+
+.micro-username {
+font-weight:bold;
+}
+
+.micro-username a {
+color:black;
+text-decoration:none;
+}
+
+.micro-username a:hover {
+text-decoration:underline;
+}
+
 .avatar img {
 width:48px;
 height:48px;
@@ -6,4 +31,77 @@ vertical-align:top;
 padding-top:5px;
 padding-right:6px;
 float:left;
+}
+
+.micro-post-text {
+word-wrap:break-word;
+display:inline-block;
+vertical-align:top;
+padding:0;
+margin:0;
+line-height:25px;
+width:85%;
+}
+
+.micro-post-text p {
+margin:0;
+padding:0;
+}
+
+.micro-post-text h4 {
+padding-top:0;
+margin-top:0;
+border-top:0;
+}
+
+.micro-post-text ul {
+list-style:none
+}
+
+.micro-post-text li::before {
+content:"•";
+color:dimgrey;
+display:inline-block;
+width:1em;
+margin-left:-1em
+}
+
+.micro-post-text li {
+line-height:1em;
+margin:0;
+padding-bottom:0.3em;
+}
+
+.micro-footer {
+margin-top:1.5em;
+margin-bottom:2em;
+}
+
+.micro-footer a {
+text-decoration:none;
+padding-right: 1em;
+}
+
+.micro-footer a:hover {
+text-decoration:underline;
+}
+
+.micro-link {
+color:grey;
+font-size:12px;
+}
+
+.micro-single-post {
+width:650px;
+margin-left:auto;
+margin-right:auto;
+margin-top:5em;
+line-height:25px;
+}
+
+.micro-meta {
+padding-top:.75em;
+padding-bottom:2em;
+color:grey;
+font-size:12px;
 }
