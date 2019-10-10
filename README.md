@@ -20,7 +20,7 @@ A new directory (mysite) is created, containing a basic directory structure, and
 
 Create a new blog entry, by running the blog command:
 ```
-    baker blog This is a test post title
+    baker blog "This is a test post title"
 ```
 
 Create a microblog entry by running:
