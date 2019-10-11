@@ -11,6 +11,10 @@ compile:
 	$(shell sed -i -e 's~BakerVersion[^"]*~BakerVersion=$(VERSION)~g' src/baker.nim.cfg )
 	nimble install -y
 
+	export REPLACEMENT="`baker --help`"; \
+	python -c "import re; s = open('README.md').read(); print(s.replace(re.search(r'Current command-line.*', s, re.DOTALL | re.MULTILINE).group(0), '''Current command-line:\n\n\`\`\`\n$${REPLACEMENT}\n\`\`\`'''))" > README.md.tmp
+	mv README.md.tmp README.md
+
 #test: compile
 #	nim c -p:. -r tests/basic_test
 
