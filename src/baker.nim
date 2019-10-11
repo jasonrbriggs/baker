@@ -41,7 +41,7 @@ Options:
   --force           Force re-generation, not just new files.
   --tags            Comma-separate list of tags, used for blog entries.
   --version         Show the version.
-  --posts=<posts>   Posts per index page [default: 10].
+  --posts <posts>   Posts per index page [default: 10].
   --taglist <tags>  Comma separated list of tags [default: ""]
 
 Available commands:
