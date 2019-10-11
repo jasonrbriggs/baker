@@ -2,7 +2,7 @@ VERSION := $(shell grep version baker.nimble | grep -oP '"\K[^"\047]+(?=["\047])
 
 export BAKER_DATETIME_OVERRIDE=2019-10-07T20:57:12+0100
 
-all: clean compile
+all: clean compile test
 
 clean:
 	rm -rf test/testsite
