@@ -83,6 +83,9 @@ proc replaceMentions(html:string):string =
     for match in matches:
         if find(match, "class=") >= 0:
             continue
+        # exclusion for twitter since it doesn't work with federation
+        if find(match, "twitter.com") >= 0:
+            continue 
         rtn = replace(rtn, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
     return rtn
 
