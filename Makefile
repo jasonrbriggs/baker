@@ -24,3 +24,4 @@ test: clean
 	cd test/testsite; echo "This is a test post" >> blog/2019/10/07/this-is-a-test-post.text
 	cd test/testsite; echo "This is a test micro post" | ../../baker micro -
 	cd test/testsite; make
+	

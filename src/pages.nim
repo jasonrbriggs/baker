@@ -11,6 +11,7 @@ import markdown
 import ndb/sqlite
 
 import db
+import invoke
 import utils
 
 
@@ -152,6 +153,8 @@ proc loadPage*(basedir:string, name:string):Page =
     var pt = EmptyString
     if hasKey(hdrs, "type"):
         pt = hdrs["type"]
+
+    c = processExecBlocks(dirname, filename, c)
 
     var html = markdown(c)
     html = replaceLikes(html)
