@@ -1,6 +1,12 @@
 import os
 
 import docopt
+import streams
+import strutils
+import system
+import times
+import timezones
+import zip/gzipfiles
 
 import blog
 import db
@@ -8,13 +14,8 @@ import emoji
 import generator
 import init
 import pages
-import streams
-import strutils
-import system
-import times
-import timezones
+import server
 import utils
-import zip/gzipfiles
 
 let doc = """
 Baker. Command line static website generator.
@@ -31,7 +32,7 @@ Usage:
   baker micro [-]
   baker rss <directory>
   baker sitemap
-  baker test
+  baker testserver [--port <port>]
   baker tags
 
 Options:
@@ -42,6 +43,7 @@ Options:
   --tags            Comma-separate list of tags, used for blog entries.
   --version         Show the version.
   --posts <posts>   Posts per index page [default: 10].
+  --port <port>     Port to use with the testserver [default: 8000].
   --taglist <tags>  Comma separated list of tags [default: ""]
 
 Available commands:
@@ -57,6 +59,7 @@ Available commands:
   rss               Generate an RSS feed file for the given directory.
   sitemap           Generate the sitemap.xml file in the root directory.
   tags              Generate the tag cloud directory.
+  testserver        Run a bare-bones webserver, for testing the generated files.
 """
 
 when isMainModule:
@@ -132,3 +135,6 @@ when isMainModule:
         let dir = $args["<directory>"]
         federatePages(".", $args["<targeturl>"], dir, days)
 
+    elif args["testserver"]:
+        let port = parseInt($args["--port"])
+        runServer(".", port)
