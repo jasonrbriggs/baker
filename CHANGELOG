@@ -1,7 +1,8 @@
 Version 2.0.5 -
 
 * Add an exclusion for twitter for the mention replacement logic (since federating something with a twitter link breaks the federation process)
-
+* Add an example notebook page
+* Add a barebones webserver for testing generated site
 
 
 Version 2.0.4 - Oct 2019
