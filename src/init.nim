@@ -95,6 +95,10 @@ type: page
 """)
 
     writeFileContent(cssDir, "stylesheet.css", """
+.pageheaderimg {
+width: 100%;
+}
+
 .microblog {
 width:650px;
 margin-left:auto;
