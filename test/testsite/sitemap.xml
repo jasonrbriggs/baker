@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
    <url>
+      <loc>notebook/notebook.html</loc>
+      <lastmod>2019-11-13</lastmod>
+   </url><url>
       <loc>micro/2019/10/07/205712.html</loc>
-      <lastmod>2019-11-06</lastmod>
+      <lastmod>2019-11-13</lastmod>
    </url><url>
       <loc>index.html</loc>
-      <lastmod>2019-11-06</lastmod>
+      <lastmod>2019-11-13</lastmod>
    </url><url>
       <loc>blog/2019/10/07/this-is-a-test-post.html</loc>
-      <lastmod>2019-11-06</lastmod>
+      <lastmod>2019-11-13</lastmod>
    </url>
 </urlset>
