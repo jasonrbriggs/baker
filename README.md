@@ -16,6 +16,7 @@ Features
 * Sitemap generation
 * Tag pages (like index pages, with multiple posts per page, but by tag)
 * Federate posts to the [fediverse](https://en.wikipedia.org/wiki/Fediverse) via webmention (through sites such as [fed.brid.gy](https://fed.brid.gy/))
+* Jupyter-style code execution in pages (basic support at the moment, see [here](https://github.com/jasonrbriggs/baker/blob/master/test/testsite/notebook/notebook.text) for an example)
 
 
 Quick Start
