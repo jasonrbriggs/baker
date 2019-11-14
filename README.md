@@ -3,6 +3,22 @@ baker
 
 Baker is a simple static site generator written with [nim](https://nim-lang.org), the [proton](https://github.com/jasonrbriggs/proton) template engine for templating, and [markdown](http://daringfireball.net/projects/markdown/‎) for content.
 
+Features
+--------
+
+* Static site generation (obviously)
+* Generate site from a Makefile (See the test site for an [example](https://github.com/jasonrbriggs/baker/blob/master/test/testsite/Makefile))
+* Create blog or microblog posts
+* Resource compression (css, jpg)
+* Generate index pages (i.e. an index of blog or microblog - effectively multiple posts per page)
+* RSS generation
+* JSON feed generation
+* Sitemap generation
+* Tag pages (like index pages, with multiple posts per page, but by tag)
+* Federate posts to the [fediverse](https://en.wikipedia.org/wiki/Fediverse) via webmention (through sites such as [fed.brid.gy](https://fed.brid.gy/))
+* Jupyter-style code execution in pages (basic support at the moment, see [here](https://github.com/jasonrbriggs/baker/blob/master/test/testsite/notebook/notebook.text) for an example)
+
+
 Quick Start
 -----------
 
@@ -49,7 +65,7 @@ Usage:
   baker micro [-]
   baker rss <directory>
   baker sitemap
-  baker test
+  baker testserver [--port <port>]
   baker tags
 
 Options:
@@ -60,6 +76,7 @@ Options:
   --tags            Comma-separate list of tags, used for blog entries.
   --version         Show the version.
   --posts <posts>   Posts per index page [default: 10].
+  --port <port>     Port to use with the testserver [default: 8000].
   --taglist <tags>  Comma separated list of tags [default: ""]
 
 Available commands:
@@ -75,4 +92,5 @@ Available commands:
   rss               Generate an RSS feed file for the given directory.
   sitemap           Generate the sitemap.xml file in the root directory.
   tags              Generate the tag cloud directory.
+  testserver        Run a bare-bones webserver, for testing the generated files.
 ```

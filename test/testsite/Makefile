@@ -1,4 +1,4 @@
-BAKER=baker
+BAKER=../../baker
 
 all:
 	$(BAKER) generate $(FORCE)

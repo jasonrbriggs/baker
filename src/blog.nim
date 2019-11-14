@@ -96,13 +96,4 @@ proc microBlog*(content:string) =
 
     generate(filepath)
 
-    let index = "micro/index.text"
-    if not fileExists(index):
-        pout = open(index, fmWrite)
-        write(pout, "title: Microblog\n")
-        write(pout, "posted-time: " & n.format(DATETIME_FORMAT) & "\n")
-        write(pout, "tags: \n")
-        write(pout, "\n\n")
-        close(pout)
-
     generateIndexes("micro", 50)

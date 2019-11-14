@@ -11,6 +11,7 @@ import markdown
 import ndb/sqlite
 
 import db
+import invoke
 import utils
 
 
@@ -83,6 +84,9 @@ proc replaceMentions(html:string):string =
     for match in matches:
         if find(match, "class=") >= 0:
             continue
+        # exclusion for twitter since it doesn't work with federation
+        if find(match, "twitter.com") >= 0:
+            continue 
         rtn = replace(rtn, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
     return rtn
 
@@ -149,6 +153,8 @@ proc loadPage*(basedir:string, name:string):Page =
     var pt = EmptyString
     if hasKey(hdrs, "type"):
         pt = hdrs["type"]
+
+    c = processExecBlocks(dirname, filename, c)
 
     var html = markdown(c)
     html = replaceLikes(html)

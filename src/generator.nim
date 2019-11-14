@@ -137,7 +137,7 @@ proc generatePageCommon(page:Page, tmps:Table[string,Template], tmp:Template) =
     setValueFromHeader(tmp, page, "sub-title", "sub-title")
     setValueFromHeader(head_template, page, "title", "title")
     setValueFromHeader(head_template, page, "sub-title", "sub-title")
-    setattribute(head_template, "generator", "content", "SiteBaker " & BakerVersion)
+    setattribute(head_template, "generator", "content", "SiteBaker")
     setTagLinks(head_template, page)
     setPostedTime(head_template, page)
 
