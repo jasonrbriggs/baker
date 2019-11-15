@@ -110,7 +110,7 @@ proc readPage(path:string):(StringTableRef, string) =
 
 proc mergeHeaders(h1:var StringTableRef, h2:StringTableRef) =
     for key,val in pairs(h2):
-        if not hasKey(h1, key) and key != "banner-image" and key != "type":
+        if not hasKey(h1, key) and key != "banner-image" and key != "type" and key != "updated-time":
             h1[key] = val
 
 
@@ -204,6 +204,14 @@ proc addPage*(rootdir:string, page:Page) =
         db.exec(sql"insert into pages (url, shorturl, created_date) values (?, ?, ?)", page.outputName, page.shortLink, dt)
 
     db.close()
+
+
+proc getLastModification*(page:Page): DateTime =
+    if hasKey(page.headers, "updated-time"):
+        let updatedtime = page.headers["updated-time"]
+        return parseDateTime(updatedtime)
+    let textname = replace(page.outputName, DOT_HTML_EXT, DOT_TEXT_EXT)
+    return utc(getLastModificationTime(textname))
 
 
 proc federatePages*(rootdir:string, federate_target_url:string, dir:string, offset_days:int) =
