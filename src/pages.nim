@@ -2,6 +2,7 @@ import httpclient
 import strformat
 import nre
 import os
+import streams
 import strtabs
 import strutils
 import times
@@ -23,6 +24,7 @@ type
         dirname*: string
         printedBase*: string
         filename*: string
+        headerKeys*: seq[string]
         headers*: StringTableRef
         content*: string
         bannerImage*: string
@@ -45,13 +47,15 @@ proc hasValidHeaders(s:string):bool =
     return false
 
 
-proc parseHeaders(s:string):StringTableRef =
-    var hdrs = newStringTable()
+proc parseHeaders(s:string):(seq[string], StringTableRef) =
+    var headers = newStringTable()
+    var headerKeys: seq[string] = @[]
     if strip(s) != "":
         for line in nre.split(s, nre.re"\n|\r\n"):
             var keyval = nre.split(line, nre.re"\s*:\s*", 2)
-            hdrs[keyval[0]] = keyval[1]
-    return hdrs
+            add(headerKeys, keyval[0])
+            headers[keyval[0]] = keyval[1]
+    return (headerKeys, headers)
 
 
 proc getHeader*(page:Page, name:string, default:string=""):string =
@@ -91,21 +95,22 @@ proc replaceMentions(html:string):string =
     return rtn
 
 
-proc readPage(path:string):(StringTableRef, string) =
+proc readPage(path:string):(seq[string], StringTableRef, string) =
     let s = readFile(path)
 
     var ss = nre.split(s, nre.re"\n\n|\r\n\r\n", maxSplit=2)
 
     var c:string = EmptyString
-    var hdrs:StringTableRef = nil
+    var headerKeys:seq[string] = @[]
+    var headers:StringTableRef = nil
 
     if not hasValidHeaders(ss[0]):
-        hdrs = parseHeaders("")
+        (headerKeys, headers) = parseHeaders("")
         c = s
     else:
-        hdrs = parseHeaders(ss[0])
+        (headerKeys, headers) = parseHeaders(ss[0])
         c = ss[1]
-    return (hdrs, c)
+    return (headerKeys, headers, c)
 
 
 proc mergeHeaders(h1:var StringTableRef, h2:StringTableRef) =
@@ -114,20 +119,24 @@ proc mergeHeaders(h1:var StringTableRef, h2:StringTableRef) =
             h1[key] = val
 
 
-proc loadPage*(basedir:string, name:string):Page =
+proc loadPage*(basedir:string, name:string, preProcess:bool = true):Page =
+    if not fileExists(name):
+        echo "Page " & name & " does not exist"
+        quit 1
+    var roothdrkeys: seq[string] = @[] 
     var roothdrs:StringTableRef = nil
     var rootc:string = EmptyString
     let indextext = joinPath(basedir, "index.text") 
     if fileExists(indextext):
-        (roothdrs, rootc) = readPage(indextext)
+        (roothdrkeys, roothdrs, rootc) = readPage(indextext)
     else:
-        (roothdrs, rootc) = readPage(joinPath(basedir, "index-page.text"))
+        (roothdrkeys, roothdrs, rootc) = readPage(joinPath(basedir, "index-page.text"))
 
-    var (hdrs, c) = readPage(name)
+    var (headerKeys, headers, c) = readPage(name)
 
-    mergeHeaders(hdrs, roothdrs)
-
-    c = replaceEmoji(c)
+    if preProcess:
+        mergeHeaders(headers, roothdrs)
+        c = replaceEmoji(c)
 
     var (dirname, filename, ext) = splitFile(name)
 
@@ -145,22 +154,37 @@ proc loadPage*(basedir:string, name:string):Page =
     let outputName = replace(name, DOT_TEXT_EXT, DOT_HTML_EXT)
 
     var tags: seq[string] = @[]
-    if hasKey(hdrs, "tags"):
-        let ts = split(hdrs["tags"], ",")
+    if hasKey(headers, "tags"):
+        let ts = split(headers["tags"], ",")
         for t in ts:
             tags.add(strip(t))
 
     var pt = EmptyString
-    if hasKey(hdrs, "type"):
-        pt = hdrs["type"]
+    if hasKey(headers, "type"):
+        pt = headers["type"]
 
-    c = processExecBlocks(dirname, filename, c)
+    var html = EmptyString
+    if preProcess:
+        c = processExecBlocks(dirname, filename, c)
 
-    var html = markdown(c)
-    html = replaceLikes(html)
-    html = replaceMentions(html)
-    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:hdrs, content:c, 
+        html = markdown(c)
+        html = replaceLikes(html)
+        html = replaceMentions(html)
+
+    return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:headers, headerKeys:headerKeys, content:c, 
         bannerImage:EmptyString, pageType:pt, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
+
+
+proc savePage(page:Page) =
+    let textname = replace(page.outputName, DOT_HTML_EXT, DOT_TEXT_EXT)
+    var output: seq[string] = @[]
+    for k in page.headerKeys:
+        add(output, k & ": " & page.headers[k])
+    add(output, "")
+    add(output, page.content)
+    var fs = newFileStream(textname, fmWrite)
+    fs.write(join(output, "\n"))
+    fs.close()
 
 
 proc initPage*(name:string, title:string, basedir:string):Page =
@@ -171,10 +195,28 @@ proc initPage*(name:string, title:string, basedir:string):Page =
 
 
 proc headersToString*(page:Page):string =
-    var rtn = ""
+    var rtn: seq[string] = @[]
     for key,val in pairs(page.headers):
-        rtn &= key & ": " & val & NEWLINE
-    return rtn & NEWLINE
+        add(rtn, key & ": " & val)
+    return join(rtn, "\n")
+
+
+proc getHeader*(dir:string, filename:string, header:string):string =
+    let pg = loadPage(dir, filename)
+    if header == "":
+        return headersToString(pg)
+    if not hasKey(pg.headers, header):
+        echo "Header " & header & " not found"
+        quit 1
+    return pg.headers[header]
+
+
+proc setHeader*(dir:string, filename:string, header:string, newvalue:string) =
+    var pg = loadPage(dir, filename, false)
+    if not hasKey(pg.headers, header):
+        add(pg.headerKeys, header)
+    pg.headers[header] = newvalue
+    savePage(pg)
 
 
 proc printPage*(page:Page) =

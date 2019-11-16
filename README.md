@@ -58,6 +58,7 @@ Usage:
   baker compress [--force]
   baker federate <targeturl> <directory> [--days <days>]
   baker generate [--file <filename>] [--force]
+  baker header --file <filename> [<header>] [--set <newvalue>]
   baker indexes [--posts <num>] <directory>
   baker dump <filename>
   baker init [<dir>]

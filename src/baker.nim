@@ -25,6 +25,7 @@ Usage:
   baker compress [--force]
   baker federate <targeturl> <directory> [--days <days>]
   baker generate [--file <filename>] [--force]
+  baker header --file <filename> [<header>] [--set <newvalue>]
   baker indexes [--posts <num>] <directory>
   baker dump <filename>
   baker init [<dir>]
@@ -138,3 +139,20 @@ when isMainModule:
     elif args["testserver"]:
         let port = parseInt($args["--port"])
         runServer(".", port)
+
+    elif args["header"]:
+        let file = $args["<filename>"]
+
+        var header = ""
+        if args["<header>"]:
+            header = $args["<header>"]
+
+        if args["--set"]:
+            if header == "":
+                echo "Cannot set a header without providing the header name"
+                quit 1
+            let newvalue = $args["<newvalue>"]
+            setHeader(".", file, header, newvalue)
+            echo "Set header " & header & " to " & newvalue
+        else:
+            echo getHeader(".", file, header)
