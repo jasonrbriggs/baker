@@ -53,8 +53,9 @@ proc parseHeaders(s:string):(seq[string], StringTableRef) =
     if strip(s) != "":
         for line in nre.split(s, nre.re"\n|\r\n"):
             var keyval = nre.split(line, nre.re"\s*:\s*", 2)
-            add(headerKeys, keyval[0])
-            headers[keyval[0]] = keyval[1]
+            if len(keyval) > 1:
+                add(headerKeys, keyval[0])
+                headers[keyval[0]] = keyval[1]
     return (headerKeys, headers)
 
 
@@ -109,7 +110,10 @@ proc readPage(path:string):(seq[string], StringTableRef, string) =
         c = s
     else:
         (headerKeys, headers) = parseHeaders(ss[0])
-        c = ss[1]
+        if len(ss) == 1:
+            c = ""
+        else:
+            c = ss[1]
     return (headerKeys, headers, c)
 
 
