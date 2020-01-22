@@ -17,6 +17,9 @@ import pages
 import server
 import utils
 
+import nre
+
+
 let doc = """
 Baker. Command line static website generator.
 
@@ -30,37 +33,40 @@ Usage:
   baker dump <filename>
   baker init [<dir>]
   baker jsonfeed <directory>
-  baker micro [-]
+  baker micro [--ignoremaxlength] [-]
   baker rss <directory>
   baker sitemap
   baker testserver [--port <port>]
   baker tags
+  baker test
 
 Options:
-  -h --help         Show this screen.
-  --days            Number of days to federate (new posts only) [default: 1].
-  --file            Generate a specific file.
-  --force           Force re-generation, not just new files.
-  --tags            Comma-separate list of tags, used for blog entries.
-  --version         Show the version.
-  --posts <posts>   Posts per index page [default: 10].
-  --port <port>     Port to use with the testserver [default: 8000].
-  --taglist <tags>  Comma separated list of tags [default: ""]
+  -h --help           Show this screen.
+  --days              Number of days to federate (new posts only) [default: 1].
+  --file              Generate a specific file.
+  --force             Force re-generation, not just new files.
+  --ignoremaxlength   Ignore the max length for a micro blog and generate anyway.
+  --tags              Comma-separate list of tags, used for blog entries.
+  --version           Show the version.
+  --posts <posts>     Posts per index page [default: 10].
+  --port <port>       Port to use with the testserver [default: 8000].
+  --taglist <tags>    Comma separated list of tags [default: ""]
 
 Available commands:
-  blog              Generate a blog entry with the given title (and optionally tags).
-  federate          Federate new posts (within a number of days) to the given target url using webmention.
-  compress          Compress resource files (css, jpg).
-  generate          Generate/render a file, or if no arguments given, all files with recent changes.
-  indexes           Create the index pages for posts in a given directory.
-  dump
-  init              Setup a directory to use with baker.
-  jsonfeed          Generate a json feed file for the given directory.
-  micro             Generate a microblog entry (reads from standard-input, two newlines finishes entry).
-  rss               Generate an RSS feed file for the given directory.
-  sitemap           Generate the sitemap.xml file in the root directory.
-  tags              Generate the tag cloud directory.
-  testserver        Run a bare-bones webserver, for testing the generated files.
+  blog                Generate a blog entry with the given title (and optionally tags).
+  federate            Federate new posts (within a number of days) to the given target url using webmention.
+  compress            Compress resource files (css, jpg).
+  generate            Generate/render a file, or if no arguments given, all files with recent changes.
+  indexes             Create the index pages for posts in a given directory.
+  dump                Dump detail about a page .text file (for debugging purposes, mostly).
+  init                Setup a directory to use with baker.
+  jsonfeed            Generate a json feed file for the given directory.
+  micro               Generate a microblog entry (reads from standard-input, two newlines finishes entry).
+  rss                 Generate an RSS feed file for the given directory.
+  sitemap             Generate the sitemap.xml file in the root directory.
+  tags                Generate the tag cloud directory.
+  testserver          Run a bare-bones webserver, for testing the generated files.
+  test                Test
 """
 
 when isMainModule:
@@ -104,7 +110,7 @@ when isMainModule:
         var contents = ""
         if args["-"]:
             contents = readAll(stdin)
-        microBlog(contents)
+        microBlog(contents, $args["--ignoremaxlength"] == "true")
 
     elif args["tags"]:
         generateTags()
@@ -156,3 +162,16 @@ when isMainModule:
             echo "Set header " & header & " to " & newvalue
         else:
             echo getHeader(".", file, header)
+
+    elif args["test"]:
+
+        var s = """title: Jason R Briggs
+meta-description: Jason R Briggs is a New Zealand-born author, software architect and developer, currently based in the UK.
+banner-image: /img/front-banner.jpg
+url: https://jasonrbriggs.com
+type: page
+blog-dir: journal"""
+        for line in nre.split(s, nre.re"\n|\r\n"):
+            var keyval = nre.split(line, nre.re"\s*:\s*", 2)
+            echo keyval[0], keyval[1]
+        
