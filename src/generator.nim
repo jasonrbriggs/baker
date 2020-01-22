@@ -507,8 +507,9 @@ proc generateSitemap*() =
     var x = 0
     for file in files:
         setvalue(tmp, "url", file, indexOf(x))
-        let mt = getLastModificationTime(replace(file, DOT_HTML_EXT, DOT_TEXT_EXT))
+        let textname = replace(file, DOT_HTML_EXT, DOT_TEXT_EXT)
+        let page = loadPage(cd, textname)
+        let mt = getLastModification(page)
         setvalue(tmp, "lastmod", mt.format(DATE_FORMAT), indexOf(x))
-        inc(x)
-
+        inc(x) 
     writePage("sitemap.xml", tmp)

@@ -1,3 +1,9 @@
+Version 2.0.7 - Jan 2020
+
+* Add functionality to ignore the max length for microblogs
+* Fix bug where a page has only headers (no body)
+
+
 Version 2.0.5 - Nov 2019
 
 * Add an exclusion for twitter for the mention replacement logic (since federating something with a twitter link breaks the federation process)

@@ -1,11 +1,6 @@
-import options
 import os
-import strtabs
-import strutils
 
 import ndb/sqlite
-
-import utils
 
 
 proc openDatabase*(rootdir:string):DbConn =

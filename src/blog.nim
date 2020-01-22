@@ -35,7 +35,7 @@ proc blog*(title:string, tags:string="") =
     close(pout)
 
 
-proc microBlog*(content:string) =
+proc microBlog*(content:string, ignoreMaxLength:bool) =
     var input = content
     if input == EmptyString:
         while true:
@@ -51,7 +51,7 @@ proc microBlog*(content:string) =
         return
 
     let inputlen = len(input)
-    if inputlen > MAX_MICROBLOG_LENGTH:
+    if inputlen > MAX_MICROBLOG_LENGTH and not ignoreMaxLength:
         echo "Micro entry is > " & MAX_MICROBLOG_LENGTH.`$` & " characters, consider reposting as:"
         echo ""
         let postsize = MAX_MICROBLOG_LENGTH-10
