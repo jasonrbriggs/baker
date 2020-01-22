@@ -38,7 +38,6 @@ Usage:
   baker sitemap
   baker testserver [--port <port>]
   baker tags
-  baker test
 
 Options:
   -h --help           Show this screen.
@@ -66,7 +65,6 @@ Available commands:
   sitemap             Generate the sitemap.xml file in the root directory.
   tags                Generate the tag cloud directory.
   testserver          Run a bare-bones webserver, for testing the generated files.
-  test                Test
 """
 
 when isMainModule:
@@ -163,15 +161,4 @@ when isMainModule:
         else:
             echo getHeader(".", file, header)
 
-    elif args["test"]:
-
-        var s = """title: Jason R Briggs
-meta-description: Jason R Briggs is a New Zealand-born author, software architect and developer, currently based in the UK.
-banner-image: /img/front-banner.jpg
-url: https://jasonrbriggs.com
-type: page
-blog-dir: journal"""
-        for line in nre.split(s, nre.re"\n|\r\n"):
-            var keyval = nre.split(line, nre.re"\s*:\s*", 2)
-            echo keyval[0], keyval[1]
         
