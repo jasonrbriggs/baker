@@ -68,7 +68,6 @@ Usage:
   baker sitemap
   baker testserver [--port <port>]
   baker tags
-  baker test
 
 Options:
   -h --help           Show this screen.
@@ -96,5 +95,4 @@ Available commands:
   sitemap             Generate the sitemap.xml file in the root directory.
   tags                Generate the tag cloud directory.
   testserver          Run a bare-bones webserver, for testing the generated files.
-  test                Test
 ```
