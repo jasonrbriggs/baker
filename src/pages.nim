@@ -31,7 +31,8 @@ type
         pageType*: string
         tags*: seq[string]
         htmlContent*: string
-        shortLink*:string
+        shortLink*: string
+        postedTime*: DateTime
 
 let mentionRe = re"<a\s*[^>]*>@[^@]+@[^<]+</a>"
 let likeRe = re"http[^\s]+\s+👍"
@@ -167,6 +168,10 @@ proc loadPage*(basedir:string, name:string, preProcess:bool = true):Page =
     if hasKey(headers, "type"):
         pt = headers["type"]
 
+    var postedTime = getCurrentDateTime()
+    if hasKey(headers, "posted-time"):
+        postedTime = parseDateTime(headers["posted-time"])
+
     var html = EmptyString
     if preProcess:
         c = processExecBlocks(dirname, filename, c)
@@ -176,7 +181,7 @@ proc loadPage*(basedir:string, name:string, preProcess:bool = true):Page =
         html = replaceMentions(html)
 
     return Page(name:name, basedir:basedir, dirname:dn, printedBase:pb, filename:filename, headers:headers, headerKeys:headerKeys, content:c, 
-        bannerImage:EmptyString, pageType:pt, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString)
+        bannerImage:EmptyString, pageType:pt, outputName:outputName, tags:tags, htmlContent:html, shortLink:EmptyString, postedTime:postedTime)
 
 
 proc savePage(page:Page) =
@@ -192,10 +197,12 @@ proc savePage(page:Page) =
 
 
 proc initPage*(name:string, title:string, basedir:string):Page =
+    let pt = getCurrentDateTime()
     let headers = {
-        "title": title
+        "title": title,
+        "posted-time": formatDateTime(pt)
     }.newStringTable
-    return Page(name:name, basedir:basedir, headers:headers)
+    return Page(name:name, basedir:basedir, headers:headers, postedTime:pt)
 
 
 proc headersToString*(page:Page):string =

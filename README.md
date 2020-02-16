@@ -62,7 +62,7 @@ Usage:
   baker indexes [--posts <num>] <directory>
   baker dump <filename>
   baker init [<dir>]
-  baker jsonfeed <directory>
+  baker jsonfeed <directory> [--combined]
   baker micro [--ignoremaxlength] [-]
   baker rss <directory>
   baker sitemap

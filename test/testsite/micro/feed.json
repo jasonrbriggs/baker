@@ -9,7 +9,8 @@
       "title": "Microblog posted at 07 Oct 2019 20:57:12",
       "url": "http://example.org/micro/micro/2019/10/07/205712.html",
       "content_text": "This is a test micro post\n",
-      "content_html": "<p>This is a test micro post</p>\n"
+      "content_html": "<p>This is a test micro post</p>\n",
+      "date_published": "2019-10-07T20:57:12+01:00"
     }
   ]
 }

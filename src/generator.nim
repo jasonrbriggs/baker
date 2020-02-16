@@ -434,7 +434,7 @@ proc generateFeed*(directory:string) =
         setvalue(tmp, "link", htmlUrl, pos)
         setvalue(tmp, "description", "<![CDATA[" & page.htmlContent & "]]>", pos)
 
-        let dt = parseDateTime(page.headers["posted-time"])
+        let dt = page.postedTime
         let fdt = formatDateTimeRss(dt)
         setvalue(tmp, "pubdate", fdt, pos)
         setvalue(tmp, "guid", replace(htmlUrl, DOT_HTML_EXT, EmptyString), pos)
@@ -447,7 +447,7 @@ proc generateFeed*(directory:string) =
     writePage(joinPath(directory, "feed.xml"), tmp)
 
 
-proc generateJsonFeed*(directory:string) =
+proc generateSingleJsonFeed(directory:string) =
     var (rootpage, files) = loadFeedFiles(directory)
 
     let url = rootpage.headers["url"]
@@ -468,15 +468,15 @@ proc generateJsonFeed*(directory:string) =
         let page = loadPage(".", file)
 
         let htmlUrl = joinUrlPaths(url, replace(file, DOT_TEXT_EXT, DOT_HTML_EXT))
-        let dt = parseDateTime(page.headers["posted-time"])
-        let fdt = formatDateTimeRss(dt)
+        let dt = page.postedTime
 
         let item = %*{
-             "id": htmlUrl,
+            "id": htmlUrl,
             "title": page.headers["title"],
             "url": htmlUrl,
             "content_text": page.content,
-            "content_html": page.htmlContent
+            "content_html": page.htmlContent,
+            "date_published": formatDateTime(dt)
         }
         add(items, item)
     jsonfeed{"items"} = items
@@ -484,6 +484,56 @@ proc generateJsonFeed*(directory:string) =
     var pout = open(filename, fmWrite)
     write(pout, pretty(jsonfeed))
     close(pout)
+
+
+proc generateCombinedFeed(directory:string) =
+    let output_name = joinPath(directory, "feed.json")
+    var feed_files: seq[JsonNode] = @[]
+    var items: seq[JsonNode] = @[]
+
+    for path in walkDirRec(directory):
+        if endsWith(path, "feed.json") and path != output_name:
+            let j = parseFile(path)
+            for i in j["items"]:
+                i["content_text"] = newJString("[" & getStr(i["title"]) & "](" & getStr(i["url"]) & ")")
+                i["content_html"] = newJString("<p><a href=\"" & getStr(i["url"]) & "\">" & getStr(i["title"]) & "</a></p>")
+                add(items, i)
+
+    items.sort do (x, y: JsonNode) -> int:
+        let xd = getStr(x["date_published"])
+        let yd = getStr(y["date_published"])
+        result = -cmp(xd, yd)
+
+
+    let rootpage = loadRootPage(directory)
+
+    let url = rootpage.headers["url"]
+
+    var feed_url = url
+    if directory != ".":
+        feed_url = joinUrlPaths(url, directory, "feed.json")
+    else:
+        feed_url = joinUrlPaths(url, "feed.json") 
+
+    var output = %* {
+        "version": "https://jsonfeed.org/version/1",
+        "title": rootpage.headers["title"],
+        "home_page_url": url,
+        "feed_url": feed_url,
+        "items": items
+    }
+
+    var pout = open(output_name, fmWrite)
+    write(pout, pretty(output))
+    close(pout)
+    echo "Generated combined json feed (" & output_name & ")"
+
+
+proc generateJsonFeed*(directory:string, combined:bool) =
+    if combined:
+        generateCombinedFeed(directory)
+    else:
+        generateSingleJsonFeed(directory)
 
 
 proc generateSitemap*() =

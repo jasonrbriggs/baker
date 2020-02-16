@@ -32,7 +32,7 @@ Usage:
   baker indexes [--posts <num>] <directory>
   baker dump <filename>
   baker init [<dir>]
-  baker jsonfeed <directory>
+  baker jsonfeed <directory> [--combined]
   baker micro [--ignoremaxlength] [-]
   baker rss <directory>
   baker sitemap
@@ -122,7 +122,7 @@ when isMainModule:
 
     elif args["jsonfeed"]:
         let dir = $args["<directory>"]
-        generateJsonFeed(dir)
+        generateJsonFeed(dir, $args["--combined"] == "true")
 
     elif args["blog"]:
         var tags = ""
