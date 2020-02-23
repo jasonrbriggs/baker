@@ -517,7 +517,7 @@ proc generateCombinedFeed(directory:string) =
 
     var output = %* {
         "version": "https://jsonfeed.org/version/1",
-        "title": rootpage.headers["title"],
+        "title": rootpage.headers["title"] & " (all content)",
         "home_page_url": url,
         "feed_url": feed_url,
         "items": items

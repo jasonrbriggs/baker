@@ -9,6 +9,8 @@ all:
 	$(BAKER) rss micro
 	$(BAKER) jsonfeed micro
 	$(BAKER) rss blog
+	$(BAKER) jsonfeed blog
+	$(BAKER) jsonfeed . --combined
 	$(BAKER) sitemap
 
 force: 
