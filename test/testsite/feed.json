@@ -1,0 +1,24 @@
+{
+  "version": "https://jsonfeed.org/version/1",
+  "title": "[Site title here] (all content)",
+  "home_page_url": "http://example.org",
+  "feed_url": "http://example.org/feed.json",
+  "items": [
+    {
+      "id": "http://example.org/micro/micro/2019/10/07/205712.html",
+      "title": "Microblog posted at 07 Oct 2019 20:57:12",
+      "url": "http://example.org/micro/micro/2019/10/07/205712.html",
+      "content_text": "[Microblog posted at 07 Oct 2019 20:57:12](http://example.org/micro/micro/2019/10/07/205712.html)",
+      "content_html": "<p><a href=\"http://example.org/micro/micro/2019/10/07/205712.html\">Microblog posted at 07 Oct 2019 20:57:12</a></p>",
+      "date_published": "2019-10-07T20:57:12+01:00"
+    },
+    {
+      "id": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
+      "title": "This is a test post",
+      "url": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
+      "content_text": "[This is a test post](http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html)",
+      "content_html": "<p><a href=\"http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html\">This is a test post</a></p>",
+      "date_published": "2019-10-07T20:57:12+01:00"
+    }
+  ]
+}

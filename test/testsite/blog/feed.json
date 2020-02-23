@@ -1,0 +1,16 @@
+{
+  "version": "https://jsonfeed.org/version/1",
+  "title": "[Blog title]",
+  "home_page_url": "http://example.org/blog",
+  "feed_url": "http://example.org/blog/blog/feed.json",
+  "items": [
+    {
+      "id": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
+      "title": "This is a test post",
+      "url": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
+      "content_text": "This is a test post\n",
+      "content_html": "<p>This is a test post</p>\n",
+      "date_published": "2019-10-07T20:57:12+01:00"
+    }
+  ]
+}
