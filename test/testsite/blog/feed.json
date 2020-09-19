@@ -8,8 +8,8 @@
       "id": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
       "title": "This is a test post",
       "url": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
-      "content_text": "This is a test post\n",
-      "content_html": "<p>This is a test post</p>\n",
+      "content_text": "This is a test post\n\n_Test emphasis_  \n**Test bold**  \n\nEnd",
+      "content_html": "<p>This is a test post</p>\n<p><em>Test emphasis</em> <br />\n<strong>Test bold</strong><br /></p>\n<p>End</p>\n",
       "date_published": "2019-10-07T20:57:12+01:00"
     }
   ]

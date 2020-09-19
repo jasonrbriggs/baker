@@ -11,6 +11,9 @@
             <title>This is a test post</title>
             <link>http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html</link>
             <description><![CDATA[<p>This is a test post</p>
+<p><em>Test emphasis</em> <br />
+<strong>Test bold</strong><br /></p>
+<p>End</p>
 ]]></description>
             <pubDate>Mon, 07 Oct 2019 20:57:12 +0100</pubDate>
             <guid>http://example.org/blog/blog/2019/10/07/this-is-a-test-post</guid>

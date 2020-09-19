@@ -37,6 +37,9 @@ type
 let mentionRe = re"<a\s*[^>]*>@[^@]+@[^<]+</a>"
 let likeRe = re"http[^\s]+\s+👍"
 let urlRe = re"http[s]*:[^\s]+"
+# required because double-space (newline in markdown) is not working any more
+let emNewlineRe = re"_  \n"
+let newlineRe = re"  \n"
 
 
 proc hasValidHeaders(s:string):bool =
@@ -94,6 +97,14 @@ proc replaceMentions(html:string):string =
         if find(match, "twitter.com") >= 0:
             continue 
         rtn = replace(rtn, match, replace(match, "<a ", "<a class=\"u-in-reply-to\" "))
+    return rtn
+
+
+proc replaceNewlines(html:string):string =
+    # edge case "_something_<br />" doesn't get replaced by markdown
+    var rtn = nre.replace(html, emNewlineRe, "_ <br />\n")
+    # other cases
+    rtn = nre.replace(rtn, newlineRe, "<br />\n")
     return rtn
 
 
@@ -176,7 +187,8 @@ proc loadPage*(basedir:string, name:string, preProcess:bool = true):Page =
     if preProcess:
         c = processExecBlocks(dirname, filename, c)
 
-        html = markdown(c)
+        html = replaceNewlines(c)
+        html = markdown(html)
         html = replaceLikes(html)
         html = replaceMentions(html)
 
