@@ -8,8 +8,8 @@
       "id": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
       "title": "This is a test post",
       "url": "http://example.org/blog/blog/2019/10/07/this-is-a-test-post.html",
-      "content_text": "This is a test post\n\n_Test emphasis_  \n**Test bold**  \n\nEnd",
-      "content_html": "<p>This is a test post</p>\n<p><em>Test emphasis</em> <br />\n<strong>Test bold</strong><br /></p>\n<p>End</p>\n",
+      "content_text": "This is a test post\n\n_Test emphasis_  \n\n**Test bold**  \n\n> [blockquote with href and forced newline](/some/link/to/something.html)  \n\n\n| Header 1 | Header 2 | Header 3 | Header 4 |\n| -------- | -------- | -------- | -------- |\n| Cell 1   | Cell 2   | Cell 3   | Cell 4   |\n| Cell 5   | Cell 6   | Cell 7   | Cell 8   |\n\n\nEnd",
+      "content_html": "<p>This is a test post</p>\n<p><em>Test emphasis</em> <br /></p>\n<p><strong>Test bold</strong><br /></p>\n<blockquote>\n<p><a href=\"/some/link/to/something.html\">blockquote with href and forced newline</a> <br /></p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th>Header 1</th>\n<th>Header 2</th>\n<th>Header 3</th>\n<th>Header 4</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Cell 1</td>\n<td>Cell 2</td>\n<td>Cell 3</td>\n<td>Cell 4</td>\n</tr>\n<tr>\n<td>Cell 5</td>\n<td>Cell 6</td>\n<td>Cell 7</td>\n<td>Cell 8</td>\n</tr></tbody></table>\n<p>End</p>\n",
       "date_published": "2019-10-07T20:57:12+01:00"
     }
   ]
