@@ -39,6 +39,7 @@ let likeRe = re"http[^\s]+\s+👍"
 let urlRe = re"http[s]*:[^\s]+"
 # required because double-space (newline in markdown) is not working any more
 let emNewlineRe = re"_  \n"
+let bracketNewlineRe = re"\)  "
 let newlineRe = re"  \n"
 
 
@@ -102,7 +103,9 @@ proc replaceMentions(html:string):string =
 
 proc replaceNewlines(html:string):string =
     # edge case "_something_<br />" doesn't get replaced by markdown
+
     var rtn = nre.replace(html, emNewlineRe, "_ <br />\n")
+    rtn = nre.replace(rtn, bracketNewlineRe, ") <br />\n")
     # other cases
     rtn = nre.replace(rtn, newlineRe, "<br />\n")
     return rtn
@@ -188,7 +191,7 @@ proc loadPage*(basedir:string, name:string, preProcess:bool = true):Page =
         c = processExecBlocks(dirname, filename, c)
 
         html = replaceNewlines(c)
-        html = markdown(html)
+        html = markdown(html, initGfmConfig())
         html = replaceLikes(html)
         html = replaceMentions(html)
 
