@@ -1,10 +1,7 @@
 import algorithm
 import json
-import lists
 import math
 import os
-import sequtils
-import strformat
 import strtabs
 import strutils
 import tables
@@ -13,8 +10,6 @@ import zip/gzipfiles
 
 import proton
 
-import db
-import emoji
 import pages
 import utils
 import whistle

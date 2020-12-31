@@ -1,7 +1,6 @@
 import os
 import osproc
 import re
-import sequtils
 import strutils
 
 import utils

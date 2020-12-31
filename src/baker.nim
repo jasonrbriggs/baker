@@ -4,20 +4,13 @@ import docopt
 import streams
 import strutils
 import system
-import times
-import timezones
-import zip/gzipfiles
 
 import blog
-import db
-import emoji
 import generator
 import init
 import pages
 import server
 import utils
-
-import nre
 
 
 let doc = """

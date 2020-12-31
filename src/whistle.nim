@@ -51,7 +51,7 @@ proc addShortenedUrl*(rootdir:string, page:var Page) =
     let rule = "RewriteRule " & matchpattern & " /" & page.outputName & " [R=301,L]"
 
     let htaccess = joinPath(rootdir, ".htaccess")
-    if not existsFile(htaccess):
+    if not fileExists(htaccess):
         return
     let s = readFile(htaccess)
     if find(s, HTACCESS_SHORTLINK_END_COMMENT) < 0:
