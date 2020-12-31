@@ -153,5 +153,3 @@ when isMainModule:
             echo "Set header " & header & " to " & newvalue
         else:
             echo getHeader(".", file, header)
-
-        
