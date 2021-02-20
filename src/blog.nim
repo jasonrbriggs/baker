@@ -13,6 +13,8 @@ const
     MAX_MICROBLOG_LENGTH:int=500
 
 let AT_LINK_RE = re.re("\\@[^@]+\\@[^\\s]+")
+let LINK_RE = re.re("\\[([^]]+)\\]\\([^)]+\\)")
+
 
 proc blog*(title:string, tags:string="") =
     let pg = loadRootPage(".")
@@ -50,7 +52,8 @@ proc microBlog*(content:string, ignoreMaxLength:bool) =
         echo "Nothing to post"
         return
 
-    let inputlen = len(input)
+    let fixedinput = replacef(input, LINK_RE, "$1")
+    let inputlen = len(fixedinput)
     if inputlen > MAX_MICROBLOG_LENGTH and not ignoreMaxLength:
         echo "Micro entry is > " & MAX_MICROBLOG_LENGTH.`$` & " characters, consider reposting as:"
         echo ""
